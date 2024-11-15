@@ -72,6 +72,885 @@ SearchContext objects can be created in several ways:
 ---
 
 
+# ESGF Python Client API Reference
+
+
+# API Reference
+
+
+# API ReferenceÂ¶
+
+
+```python
+>>> lm = LogonManager()
+>>> lm.is_logged_on()
+False
+>>> lm.logon(username, password, myproxy_hostname, bootstrap=True)
+>>> lm.is_logged_on()
+True
+```
+
+
+```python
+>>> lm.logoff()
+>>> lm.is_logged_on()
+False
+>>> lm.logon_with_openid(openid, password, bootstrap=True)
+>>> lm.is_logged_on()
+True
+```
+
+
+> **Warning:**
+> Warning
+Prior to v0.1.1 the url parameter expected the full URL of the
+search endpoint up to the query string.  This has now been changed
+to expect url to ommit the final endpoint name,
+e.g. https://esgf-node.llnl.gov/esg-search/search should be changed
+to https://esgf-node.llnl.gov/esg-search in client code.  The
+current implementation detects the presence of /search and
+corrects the URL to retain backward compatibility but this feature
+may not remain in future versions.
+
+
+- **class pyesgf.search.connection.SearchConnection(url, distrib=True, cache=None, timeout=120, expire_after=datetime.timedelta(seconds=3600), session=None, verify=True, context_class=None)[source]Â¶** – Variables
+
+url â The URL to the Search API service.  This should be the URL
+of the ESGF search service excluding the final endpoint name.
+Usually this is http://<hostname>/esg-search
+distrib â Boolean stating whether searches through this connection are
+distributed.  i.e. whether the Search service distributes the query to
+other search peers.  See also the documentation for the facets
+argument to pyesgf.search.context.SearchContext in relation to
+distributed searches.
+cache â Path to sqlite cache file. Cache expires every hours.
+timeout â Time (in seconds) before query returns an error.
+Default: 120s.
+expire_after â Time delta after cache expires. Default: 1 hour.
+session â requests.session object. optional.
+verify â boolean, determines if query should be sent over a verified
+channel.
+
+
+
+
+
+get_shard_list()[source]Â¶
+return the list of all available shards.  A subset of the returned list
+can be supplied to âsend_query()â to limit the query to selected
+shards.
+Shards are described by hostname and mapped to SOLr shard descriptions
+internally.
+
+Returns
+the list of available shards
+
+
+
+
+
+new_context(context_class=None, latest=None, facets=None, fields=None, from_timestamp=None, to_timestamp=None, replica=None, shards=None, search_type=None, **constraints)[source]Â¶
+Returns a pyesgf.search.context.SearchContext class for
+performing faceted searches.
+See SearchContext.__init__() for documentation on the
+arguments.
+
+
+
+send_search(query_dict, limit=None, offset=None, shards=None)[source]Â¶
+Send a query to the âsearchâ endpoint.
+See send_query() for details.
+
+Returns
+The json document for the search results
+
+
+
+
+
+send_wget(query_dict, shards=None)[source]Â¶
+Send a query to the âsearchâ endpoint.
+See send_query() for details.
+
+Returns
+A string containing the script.
+
+- **Variables** – url â The URL to the Search API service.  This should be the URL
+of the ESGF search service excluding the final endpoint name.
+Usually this is http://<hostname>/esg-search
+distrib â Boolean stating whether searches through this connection are
+distributed.  i.e. whether the Search service distributes the query to
+other search peers.  See also the documentation for the facets
+argument to pyesgf.search.context.SearchContext in relation to
+distributed searches.
+cache â Path to sqlite cache file. Cache expires every hours.
+timeout â Time (in seconds) before query returns an error.
+Default: 120s.
+expire_after â Time delta after cache expires. Default: 1 hour.
+session â requests.session object. optional.
+verify â boolean, determines if query should be sent over a verified
+channel.
+
+- **get_shard_list()[source]Â¶** – return the list of all available shards.  A subset of the returned list
+can be supplied to âsend_query()â to limit the query to selected
+shards.
+Shards are described by hostname and mapped to SOLr shard descriptions
+internally.
+
+Returns
+the list of available shards
+
+- **Returns** – the list of available shards
+
+- **new_context(context_class=None, latest=None, facets=None, fields=None, from_timestamp=None, to_timestamp=None, replica=None, shards=None, search_type=None, **constraints)[source]Â¶** – Returns a pyesgf.search.context.SearchContext class for
+performing faceted searches.
+See SearchContext.__init__() for documentation on the
+arguments.
+
+- **send_search(query_dict, limit=None, offset=None, shards=None)[source]Â¶** – Send a query to the âsearchâ endpoint.
+See send_query() for details.
+
+Returns
+The json document for the search results
+
+- **Returns** – The json document for the search results
+
+- **send_wget(query_dict, shards=None)[source]Â¶** – Send a query to the âsearchâ endpoint.
+See send_query() for details.
+
+Returns
+A string containing the script.
+
+- **Returns** – A string containing the script.
+
+
+
+- **Variables** – url â The URL to the Search API service.  This should be the URL
+of the ESGF search service excluding the final endpoint name.
+Usually this is http://<hostname>/esg-search
+distrib â Boolean stating whether searches through this connection are
+distributed.  i.e. whether the Search service distributes the query to
+other search peers.  See also the documentation for the facets
+argument to pyesgf.search.context.SearchContext in relation to
+distributed searches.
+cache â Path to sqlite cache file. Cache expires every hours.
+timeout â Time (in seconds) before query returns an error.
+Default: 120s.
+expire_after â Time delta after cache expires. Default: 1 hour.
+session â requests.session object. optional.
+verify â boolean, determines if query should be sent over a verified
+channel.
+
+
+
+- **get_shard_list()[source]Â¶** – return the list of all available shards.  A subset of the returned list
+can be supplied to âsend_query()â to limit the query to selected
+shards.
+Shards are described by hostname and mapped to SOLr shard descriptions
+internally.
+
+Returns
+the list of available shards
+
+- **Returns** – the list of available shards
+
+
+
+- **Returns** – the list of available shards
+
+
+
+- **new_context(context_class=None, latest=None, facets=None, fields=None, from_timestamp=None, to_timestamp=None, replica=None, shards=None, search_type=None, **constraints)[source]Â¶** – Returns a pyesgf.search.context.SearchContext class for
+performing faceted searches.
+See SearchContext.__init__() for documentation on the
+arguments.
+
+
+
+- **send_search(query_dict, limit=None, offset=None, shards=None)[source]Â¶** – Send a query to the âsearchâ endpoint.
+See send_query() for details.
+
+Returns
+The json document for the search results
+
+- **Returns** – The json document for the search results
+
+
+
+- **Returns** – The json document for the search results
+
+
+
+- **send_wget(query_dict, shards=None)[source]Â¶** – Send a query to the âsearchâ endpoint.
+See send_query() for details.
+
+Returns
+A string containing the script.
+
+- **Returns** – A string containing the script.
+
+
+
+- **Returns** – A string containing the script.
+
+
+
+- **pyesgf.search.connection.create_single_session(cache=None, expire_after=datetime.timedelta(seconds=3600), **kwargs)[source]Â¶** – Simple helper function to start a requests or requests_cache session.
+cache, if specified is a filename to a threadsafe sqlite database
+expire_after specifies how long the cache should be kept
+
+
+
+- **pyesgf.search.connection.query_keyword_type(keyword)[source]Â¶** – Returns the keyword type of a search query keyword.
+Possible values are âsystemâ, âfreetextâ, âfacetâ, âtemporalâ and
+âgeospatialâ.  If the keyword is unknown it is assumed to be a
+facet keyword
+
+
+
+- **class pyesgf.search.context.AggregationSearchContext(connection, constraints, search_type=None, latest=None, facets=None, fields=None, from_timestamp=None, to_timestamp=None, replica=None, shards=None)[source]Â¶** – 
+
+
+
+- **class pyesgf.search.context.DatasetSearchContext(connection, constraints, search_type=None, latest=None, facets=None, fields=None, from_timestamp=None, to_timestamp=None, replica=None, shards=None)[source]Â¶** – 
+
+
+
+- **class pyesgf.search.context.FileSearchContext(connection, constraints, search_type=None, latest=None, facets=None, fields=None, from_timestamp=None, to_timestamp=None, replica=None, shards=None)[source]Â¶** – 
+
+
+
+- **class pyesgf.search.context.SearchContext(connection, constraints, search_type=None, latest=None, facets=None, fields=None, from_timestamp=None, to_timestamp=None, replica=None, shards=None)[source]Â¶** – Instances of this class represent the state of a current search.
+It exposes what facets are available to select and the facet counts
+if they are available.
+Subclasses of this class can restrict the search options.  For instance
+FileSearchContext, DatasetSerachContext or CMIP5SearchContext
+SearchContext instances are connected to SearchConnection instances.  You
+normally create SearchContext instances via one of:
+1. Calling SearchConnection.new_context()
+2. Calling SearchContext.constrain()
+
+Variables
+
+constraints â A dictionary of facet constraints currently in effect.
+constraint[facet_name] = [value, value, ...]
+facets â A string containing a comma-separated list of facets to be
+returned (for example 'source_id,ensemble_id'). If set, this will
+be used to select which facet counts to include, as returned in the
+facet_counts dictionary.  Defaults to including all available
+facets, but with distributed searches (where the SearchConnection
+instance was created with distrib=True), some results may be
+missing for server-side reasons when requesting all facets, so a
+warning message will be issued. This contains further details.
+
+
+Property facet_counts
+A dictionary of available hits with each
+facet value for the search as currently constrained.
+This property returns a dictionary of dictionaries where
+facet_counts[facet][facet_value] == hit_count
+
+Property hit_count
+The total number of hits available with current
+constraints.
+
+
+
+
+constrain(**constraints)[source]Â¶
+Return a new instance with the additional constraints.
+
+
+
+get_download_script(**constraints)[source]Â¶
+Download a script for downloading all files in the set of results.
+
+Parameters
+constraints â Further constraints for this query. Equivalent
+to calling self.constrain(**constraints).get_download_script()
+
+Returns
+A string containing the script
+
+
+
+
+
+get_facet_options()[source]Â¶
+Return a dictionary of facet counts filtered to remove all
+facets that are completely constrained.  This method is
+similar to the property facet_counts except facet values
+which are not relevant for further constraining are removed.
+
+
+
+search(batch_size=50, ignore_facet_check=False, **constraints)[source]Â¶
+Perform the search with current constraints returning a set of results.
+
+Batch_size
+The number of results to get per HTTP request.
+
+Ignore_facet_check
+Do not make an extra HTTP request to populate
+facet_counts and hit_count.
+
+Parameters
+constraints â Further constraints for this query.  Equivalent
+to calling self.constrain(**constraints).search()
+
+Returns
+A ResultSet for this query
+
+- **Variables** – constraints â A dictionary of facet constraints currently in effect.
+constraint[facet_name] = [value, value, ...]
+facets â A string containing a comma-separated list of facets to be
+returned (for example 'source_id,ensemble_id'). If set, this will
+be used to select which facet counts to include, as returned in the
+facet_counts dictionary.  Defaults to including all available
+facets, but with distributed searches (where the SearchConnection
+instance was created with distrib=True), some results may be
+missing for server-side reasons when requesting all facets, so a
+warning message will be issued. This contains further details.
+
+- **Property facet_counts** – A dictionary of available hits with each
+facet value for the search as currently constrained.
+This property returns a dictionary of dictionaries where
+facet_counts[facet][facet_value] == hit_count
+
+- **Property hit_count** – The total number of hits available with current
+constraints.
+
+- **constrain(**constraints)[source]Â¶** – Return a new instance with the additional constraints.
+
+- **get_download_script(**constraints)[source]Â¶** – Download a script for downloading all files in the set of results.
+
+Parameters
+constraints â Further constraints for this query. Equivalent
+to calling self.constrain(**constraints).get_download_script()
+
+Returns
+A string containing the script
+
+- **Parameters** – constraints â Further constraints for this query. Equivalent
+to calling self.constrain(**constraints).get_download_script()
+
+- **Returns** – A string containing the script
+
+- **get_facet_options()[source]Â¶** – Return a dictionary of facet counts filtered to remove all
+facets that are completely constrained.  This method is
+similar to the property facet_counts except facet values
+which are not relevant for further constraining are removed.
+
+- **search(batch_size=50, ignore_facet_check=False, **constraints)[source]Â¶** – Perform the search with current constraints returning a set of results.
+
+Batch_size
+The number of results to get per HTTP request.
+
+Ignore_facet_check
+Do not make an extra HTTP request to populate
+facet_counts and hit_count.
+
+Parameters
+constraints â Further constraints for this query.  Equivalent
+to calling self.constrain(**constraints).search()
+
+Returns
+A ResultSet for this query
+
+- **Batch_size** – The number of results to get per HTTP request.
+
+- **Ignore_facet_check** – Do not make an extra HTTP request to populate
+facet_counts and hit_count.
+
+- **Parameters** – constraints â Further constraints for this query.  Equivalent
+to calling self.constrain(**constraints).search()
+
+- **Returns** – A ResultSet for this query
+
+
+
+- **Variables** – constraints â A dictionary of facet constraints currently in effect.
+constraint[facet_name] = [value, value, ...]
+facets â A string containing a comma-separated list of facets to be
+returned (for example 'source_id,ensemble_id'). If set, this will
+be used to select which facet counts to include, as returned in the
+facet_counts dictionary.  Defaults to including all available
+facets, but with distributed searches (where the SearchConnection
+instance was created with distrib=True), some results may be
+missing for server-side reasons when requesting all facets, so a
+warning message will be issued. This contains further details.
+
+- **Property facet_counts** – A dictionary of available hits with each
+facet value for the search as currently constrained.
+This property returns a dictionary of dictionaries where
+facet_counts[facet][facet_value] == hit_count
+
+- **Property hit_count** – The total number of hits available with current
+constraints.
+
+
+
+- **constrain(**constraints)[source]Â¶** – Return a new instance with the additional constraints.
+
+
+
+- **get_download_script(**constraints)[source]Â¶** – Download a script for downloading all files in the set of results.
+
+Parameters
+constraints â Further constraints for this query. Equivalent
+to calling self.constrain(**constraints).get_download_script()
+
+Returns
+A string containing the script
+
+- **Parameters** – constraints â Further constraints for this query. Equivalent
+to calling self.constrain(**constraints).get_download_script()
+
+- **Returns** – A string containing the script
+
+
+
+- **Parameters** – constraints â Further constraints for this query. Equivalent
+to calling self.constrain(**constraints).get_download_script()
+
+- **Returns** – A string containing the script
+
+
+
+- **get_facet_options()[source]Â¶** – Return a dictionary of facet counts filtered to remove all
+facets that are completely constrained.  This method is
+similar to the property facet_counts except facet values
+which are not relevant for further constraining are removed.
+
+
+
+- **search(batch_size=50, ignore_facet_check=False, **constraints)[source]Â¶** – Perform the search with current constraints returning a set of results.
+
+Batch_size
+The number of results to get per HTTP request.
+
+Ignore_facet_check
+Do not make an extra HTTP request to populate
+facet_counts and hit_count.
+
+Parameters
+constraints â Further constraints for this query.  Equivalent
+to calling self.constrain(**constraints).search()
+
+Returns
+A ResultSet for this query
+
+- **Batch_size** – The number of results to get per HTTP request.
+
+- **Ignore_facet_check** – Do not make an extra HTTP request to populate
+facet_counts and hit_count.
+
+- **Parameters** – constraints â Further constraints for this query.  Equivalent
+to calling self.constrain(**constraints).search()
+
+- **Returns** – A ResultSet for this query
+
+
+
+- **Batch_size** – The number of results to get per HTTP request.
+
+- **Ignore_facet_check** – Do not make an extra HTTP request to populate
+facet_counts and hit_count.
+
+- **Parameters** – constraints â Further constraints for this query.  Equivalent
+to calling self.constrain(**constraints).search()
+
+- **Returns** – A ResultSet for this query
+
+
+
+- **class pyesgf.search.results.AggregationResult(json, context)[source]Â¶** – A result object for ESGF aggregations.  Properties from BaseResultare inherited.
+
+
+
+Property aggregation_id
+The aggregation id
+
+- **A result object for ESGF aggregations.  Properties from BaseResult** – are inherited.
+
+- **Property aggregation_id** – The aggregation id
+
+
+
+- **A result object for ESGF aggregations.  Properties from BaseResult** – are inherited.
+
+
+
+- **Property aggregation_id** – The aggregation id
+
+
+
+- **class pyesgf.search.results.BaseResult(json, context)[source]Â¶** – Base class for results.
+Subclasses represent different search types such as File and Dataset.
+
+Variables
+
+json â The original json representation of the result.
+context â The SearchContext which generated this result.
+
+
+Property urls
+a dictionary of the form
+{service: [(url, mime_type), ...], ...}
+
+Property opendap_url
+The url of an OPeNDAP endpoint for this result
+if available
+
+Property las_url
+The url of an LAS endpoint for this result if available
+
+Property download_url
+The url for downloading the result by HTTP
+if available
+
+Property gridftp_url
+The url for downloading the result by Globus
+if available
+
+Property globus_url
+The url for downloading the result by Globus
+if available (including endpoint)
+
+Property index_node
+The index node from where the metadata is stored.
+Calls to *_context() will optimise queries to only address this node.
+
+- **Variables** – json â The original json representation of the result.
+context â The SearchContext which generated this result.
+
+- **Property urls** – a dictionary of the form
+{service: [(url, mime_type), ...], ...}
+
+- **Property opendap_url** – The url of an OPeNDAP endpoint for this result
+if available
+
+- **Property las_url** – The url of an LAS endpoint for this result if available
+
+- **Property download_url** – The url for downloading the result by HTTP
+if available
+
+- **Property gridftp_url** – The url for downloading the result by Globus
+if available
+
+- **Property globus_url** – The url for downloading the result by Globus
+if available (including endpoint)
+
+- **Property index_node** – The index node from where the metadata is stored.
+Calls to *_context() will optimise queries to only address this node.
+
+
+
+- **Variables** – json â The original json representation of the result.
+context â The SearchContext which generated this result.
+
+- **Property urls** – a dictionary of the form
+{service: [(url, mime_type), ...], ...}
+
+- **Property opendap_url** – The url of an OPeNDAP endpoint for this result
+if available
+
+- **Property las_url** – The url of an LAS endpoint for this result if available
+
+- **Property download_url** – The url for downloading the result by HTTP
+if available
+
+- **Property gridftp_url** – The url for downloading the result by Globus
+if available
+
+- **Property globus_url** – The url for downloading the result by Globus
+if available (including endpoint)
+
+- **Property index_node** – The index node from where the metadata is stored.
+Calls to *_context() will optimise queries to only address this node.
+
+
+
+- **class pyesgf.search.results.DatasetResult(json, context)[source]Â¶** – A result object for ESGF datasets.
+
+Property dataset_id
+The solr dataset_id which is unique throughout the
+system.
+
+
+
+
+aggregation_context()[source]Â¶
+Return a SearchContext for searching for aggregations within this
+dataset.
+
+
+
+file_context()[source]Â¶
+Return a SearchContext for searching for files within this dataset.
+
+
+
+property number_of_filesÂ¶
+Returns file count as reported by the dataset record.
+
+- **Property dataset_id** – The solr dataset_id which is unique throughout the
+system.
+
+- **aggregation_context()[source]Â¶** – Return a SearchContext for searching for aggregations within this
+dataset.
+
+- **file_context()[source]Â¶** – Return a SearchContext for searching for files within this dataset.
+
+- **property number_of_filesÂ¶** – Returns file count as reported by the dataset record.
+
+
+
+- **Property dataset_id** – The solr dataset_id which is unique throughout the
+system.
+
+
+
+- **aggregation_context()[source]Â¶** – Return a SearchContext for searching for aggregations within this
+dataset.
+
+
+
+- **file_context()[source]Â¶** – Return a SearchContext for searching for files within this dataset.
+
+
+
+- **property number_of_filesÂ¶** – Returns file count as reported by the dataset record.
+
+
+
+- **class pyesgf.search.results.FileResult(json, context)[source]Â¶** – A result object for ESGF files.  Properties from BaseResult areinherited.
+
+
+
+Property file_id
+The identifier for the file
+
+Property checksum
+The checksum of the file
+
+Property checksum_type
+The algorithm used for generating the checksum
+
+Property filename
+The filename
+
+Property size
+The file size in bytes
+
+- **A result object for ESGF files.  Properties from BaseResult are** – inherited.
+
+- **Property file_id** – The identifier for the file
+
+- **Property checksum** – The checksum of the file
+
+- **Property checksum_type** – The algorithm used for generating the checksum
+
+- **Property filename** – The filename
+
+- **Property size** – The file size in bytes
+
+
+
+- **A result object for ESGF files.  Properties from BaseResult are** – inherited.
+
+
+
+- **Property file_id** – The identifier for the file
+
+- **Property checksum** – The checksum of the file
+
+- **Property checksum_type** – The algorithm used for generating the checksum
+
+- **Property filename** – The filename
+
+- **Property size** – The file size in bytes
+
+
+
+- **class pyesgf.search.results.ResultSet(context, batch_size=50, eager=True)[source]Â¶** – Variables
+context â The search context object used to generate this resultset
+
+Property batch_size
+The number of results that will be requested
+from esgf-search as one call.  This must be set on creation and
+cannot change.
+
+- **Variables** – context â The search context object used to generate this resultset
+
+- **Property batch_size** – The number of results that will be requested
+from esgf-search as one call.  This must be set on creation and
+cannot change.
+
+
+
+- **Variables** – context â The search context object used to generate this resultset
+
+- **Property batch_size** – The number of results that will be requested
+from esgf-search as one call.  This must be set on creation and
+cannot change.
+
+
+
+- **class pyesgf.logon.LogonManager(esgf_dir='/home/docs/.esg', dap_config='/home/docs/.dodsrc', verify=True)[source]Â¶** – Manages ESGF crendentials and security configuration files.
+Also integrates with NetCDFâs secure OPeNDAP configuration.
+
+
+logoff(clear_trustroots=False)[source]Â¶
+Remove any obtained credentials from the ESGF environment.
+
+Parameters
+clear_trustroots â If True also remove trustroots.
+
+
+
+
+
+logon(username=None, password=None, hostname=None, bootstrap=False, update_trustroots=True, interactive=True)[source]Â¶
+Obtain ESGF credentials from the specified MyProxy service.
+If interactive == True then any missing parameters of password,
+username or hostname will be prompted for at the terminal.
+
+Parameters
+
+interactive â Whether to ask for input at the terminal for
+any missing information.  I.e. username, password or hostname.
+bootstrap â Whether to bootstrap the trustroots for this
+MyProxy service.
+update_trustroots â Whether to update the trustroots for this
+MyProxy service.
+
+
+
+
+
+
+logon_with_openid(openid, password=None, bootstrap=False, update_trustroots=True, interactive=True)[source]Â¶
+Obtains ESGF credentials by detecting the MyProxy parameters from
+the users OpenID.  Some ESGF compatible OpenIDs do not contain enough
+information to obtain credentials.  In this case the user is prompted
+for missing information if interactive == True, otherwise an
+exception is raised.
+
+Parameters
+openid â OpenID to login with See logon() for parameters
+interactive, bootstrap and update_trustroots.
+
+- **logoff(clear_trustroots=False)[source]Â¶** – Remove any obtained credentials from the ESGF environment.
+
+Parameters
+clear_trustroots â If True also remove trustroots.
+
+- **Parameters** – clear_trustroots â If True also remove trustroots.
+
+- **logon(username=None, password=None, hostname=None, bootstrap=False, update_trustroots=True, interactive=True)[source]Â¶** – Obtain ESGF credentials from the specified MyProxy service.
+If interactive == True then any missing parameters of password,
+username or hostname will be prompted for at the terminal.
+
+Parameters
+
+interactive â Whether to ask for input at the terminal for
+any missing information.  I.e. username, password or hostname.
+bootstrap â Whether to bootstrap the trustroots for this
+MyProxy service.
+update_trustroots â Whether to update the trustroots for this
+MyProxy service.
+
+- **Parameters** – interactive â Whether to ask for input at the terminal for
+any missing information.  I.e. username, password or hostname.
+bootstrap â Whether to bootstrap the trustroots for this
+MyProxy service.
+update_trustroots â Whether to update the trustroots for this
+MyProxy service.
+
+- **logon_with_openid(openid, password=None, bootstrap=False, update_trustroots=True, interactive=True)[source]Â¶** – Obtains ESGF credentials by detecting the MyProxy parameters from
+the users OpenID.  Some ESGF compatible OpenIDs do not contain enough
+information to obtain credentials.  In this case the user is prompted
+for missing information if interactive == True, otherwise an
+exception is raised.
+
+Parameters
+openid â OpenID to login with See logon() for parameters
+interactive, bootstrap and update_trustroots.
+
+- **Parameters** – openid â OpenID to login with See logon() for parameters
+interactive, bootstrap and update_trustroots.
+
+
+
+- **logoff(clear_trustroots=False)[source]Â¶** – Remove any obtained credentials from the ESGF environment.
+
+Parameters
+clear_trustroots â If True also remove trustroots.
+
+- **Parameters** – clear_trustroots â If True also remove trustroots.
+
+
+
+- **Parameters** – clear_trustroots â If True also remove trustroots.
+
+
+
+- **logon(username=None, password=None, hostname=None, bootstrap=False, update_trustroots=True, interactive=True)[source]Â¶** – Obtain ESGF credentials from the specified MyProxy service.
+If interactive == True then any missing parameters of password,
+username or hostname will be prompted for at the terminal.
+
+Parameters
+
+interactive â Whether to ask for input at the terminal for
+any missing information.  I.e. username, password or hostname.
+bootstrap â Whether to bootstrap the trustroots for this
+MyProxy service.
+update_trustroots â Whether to update the trustroots for this
+MyProxy service.
+
+- **Parameters** – interactive â Whether to ask for input at the terminal for
+any missing information.  I.e. username, password or hostname.
+bootstrap â Whether to bootstrap the trustroots for this
+MyProxy service.
+update_trustroots â Whether to update the trustroots for this
+MyProxy service.
+
+
+
+- **Parameters** – interactive â Whether to ask for input at the terminal for
+any missing information.  I.e. username, password or hostname.
+bootstrap â Whether to bootstrap the trustroots for this
+MyProxy service.
+update_trustroots â Whether to update the trustroots for this
+MyProxy service.
+
+
+
+- **logon_with_openid(openid, password=None, bootstrap=False, update_trustroots=True, interactive=True)[source]Â¶** – Obtains ESGF credentials by detecting the MyProxy parameters from
+the users OpenID.  Some ESGF compatible OpenIDs do not contain enough
+information to obtain credentials.  In this case the user is prompted
+for missing information if interactive == True, otherwise an
+exception is raised.
+
+Parameters
+openid â OpenID to login with See logon() for parameters
+interactive, bootstrap and update_trustroots.
+
+- **Parameters** – openid â OpenID to login with See logon() for parameters
+interactive, bootstrap and update_trustroots.
+
+
+
+- **Parameters** – openid â OpenID to login with See logon() for parameters
+interactive, bootstrap and update_trustroots.
+
+
+
+
+---
+
+
 # Code Examples from Notebooks
 
 
@@ -428,498 +1307,6 @@ da.to_netcdf('tas_africa_19500116.nc')
 
 ## Examples Notebooks
 
-
-
-### download.ipynb
-
-## Examples of pyesgf download usage
-
-Obtain MyProxy credentials to allow downloading files:
-
-```python
-from pyesgf.logon import LogonManager
-lm = LogonManager()
-lm.logoff()
-lm.is_logged_on()
-```
-
-```python
-myproxy_host = 'esgf-data.dkrz.de'
-lm.logon(username=None, password=None, hostname=myproxy_host)
-lm.is_logged_on()
-```
-
-Now download a file using the ESGF wget script extracted from the server:
-
-```python
-from pyesgf.search import SearchConnection
-conn = SearchConnection('https://esgf-data.dkrz.de/esg-search', distrib=False)
-ctx = conn.new_context(project='obs4MIPs', institute='FUB-DWD')
-ds = ctx.search()[0]
-
-import tempfile
-fc = ds.file_context()
-wget_script_content = fc.get_download_script()
-script_path = tempfile.mkstemp(suffix='.sh', prefix='download-')[1]
-with open(script_path, "w") as writer:
-    writer.write(wget_script_content)
-    
-import os, subprocess
-os.chmod(script_path, 0o750)
-download_dir = os.path.dirname(script_path)
-subprocess.check_output("{}".format(script_path), cwd=download_dir)
-
-```
-
-… and the files will be downloaded to a temporary directory:
-
-```python
-print(download_dir)
-```
-
-If you are doing batch searching and things are running slow, you might be able to achieve a considerable speed up by sending the following argument to the search call:
-
-```python
-ctx.search(ignore_facet_check=True)
-```
-
-This cuts out an extra call that typically takes 2 seconds to return a response. Note that it may mean some of the functionality is affected (such as being able to view the available facets and access the hit count) so use this feature with care.
-
-You can also dictate how the search batches up its requests with:
-
-```python
-ctx.search(batch_size=250)
-```
-
-The ``batch_size`` argument does not affect the final result but may affect the speed of the response. The batch size can also be set as a default in the ``pyesgf.search.consts`` module.
-
----
-
-
-### download.ipynb
-
-## Examples of pyesgf download usage
-
-Obtain MyProxy credentials to allow downloading files:
-
-```python
-from pyesgf.logon import LogonManager
-lm = LogonManager()
-lm.logoff()
-lm.is_logged_on()
-```
-
-```python
-myproxy_host = 'esgf-data.dkrz.de'
-lm.logon(username=None, password=None, hostname=myproxy_host)
-lm.is_logged_on()
-```
-
-Now download a file using the ESGF wget script extracted from the server:
-
-```python
-from pyesgf.search import SearchConnection
-conn = SearchConnection('https://esgf-data.dkrz.de/esg-search', distrib=False)
-ctx = conn.new_context(project='obs4MIPs', institute='FUB-DWD')
-ds = ctx.search()[0]
-
-import tempfile
-fc = ds.file_context()
-wget_script_content = fc.get_download_script()
-script_path = tempfile.mkstemp(suffix='.sh', prefix='download-')[1]
-with open(script_path, "w") as writer:
-    writer.write(wget_script_content)
-    
-import os, subprocess
-os.chmod(script_path, 0o750)
-download_dir = os.path.dirname(script_path)
-subprocess.check_output("{}".format(script_path), cwd=download_dir)
-
-```
-
-… and the files will be downloaded to a temporary directory:
-
-```python
-print(download_dir)
-```
-
-If you are doing batch searching and things are running slow, you might be able to achieve a considerable speed up by sending the following argument to the search call:
-
-```python
-ctx.search(ignore_facet_check=True)
-```
-
-This cuts out an extra call that typically takes 2 seconds to return a response. Note that it may mean some of the functionality is affected (such as being able to view the available facets and access the hit count) so use this feature with care.
-
-You can also dictate how the search batches up its requests with:
-
-```python
-ctx.search(batch_size=250)
-```
-
-The ``batch_size`` argument does not affect the final result but may affect the speed of the response. The batch size can also be set as a default in the ``pyesgf.search.consts`` module.
-
----
-
-
-### logon.ipynb
-
-## Examples of pyesgf.logon usage
-
-**NOTE**: For the logon module you need to install the latest `myproxyclient` from pypi:
-```
-$ conda create -c conda-forge -n esgf-pyclient python=3.10 pip esgf-pyclient
-$ conda activate esgf-pyclient
-(esgf-pyclient) pip install myproxyclient
-```
-
-Obtain MyProxy credentials to allow downloading files or using secured OpenDAP:
-
-```python
-from pyesgf.logon import LogonManager
-lm = LogonManager()
-lm.logoff()
-lm.is_logged_on()
-```
-
-**NOTE**: When you run it for the first time you need to set `bootstrap=True`.
-
-```python
-OPENID = 'https://esgf-data.dkrz.de/esgf-idp/openid/USERNAME'
-lm.logon_with_openid(openid=OPENID, password=None, bootstrap=True)
-lm.is_logged_on()
-```
-
-**NOTE**: you may be prompted for your username if not available via your OpenID.
-
-
-Obtain MyProxy credentials from the MyProxy host in *interactive* mode asking you for *username* and *password*:
-
-```python
-myproxy_host = 'esgf-data.dkrz.de'
-lm.logon(hostname=myproxy_host, interactive=True, bootstrap=True)
-lm.is_logged_on()
-```
-
-**NOTE**: See the ``pyesgf.logon`` module documentation for details of how to use myproxy username instead of OpenID.
-
----
-
-
-### logon.ipynb
-
-## Examples of pyesgf.logon usage
-
-**NOTE**: For the logon module you need to install the latest `myproxyclient` from pypi:
-```
-$ conda create -c conda-forge -n esgf-pyclient python=3.10 pip esgf-pyclient
-$ conda activate esgf-pyclient
-(esgf-pyclient) pip install myproxyclient
-```
-
-Obtain MyProxy credentials to allow downloading files or using secured OpenDAP:
-
-```python
-from pyesgf.logon import LogonManager
-lm = LogonManager()
-lm.logoff()
-lm.is_logged_on()
-```
-
-**NOTE**: When you run it for the first time you need to set `bootstrap=True`.
-
-```python
-OPENID = 'https://esgf-data.dkrz.de/esgf-idp/openid/USERNAME'
-lm.logon_with_openid(openid=OPENID, password=None, bootstrap=True)
-lm.is_logged_on()
-```
-
-**NOTE**: you may be prompted for your username if not available via your OpenID.
-
-
-Obtain MyProxy credentials from the MyProxy host in *interactive* mode asking you for *username* and *password*:
-
-```python
-myproxy_host = 'esgf-data.dkrz.de'
-lm.logon(hostname=myproxy_host, interactive=True, bootstrap=True)
-lm.is_logged_on()
-```
-
-**NOTE**: See the ``pyesgf.logon`` module documentation for details of how to use myproxy username instead of OpenID.
-
----
-
-
-### search.ipynb
-
-## Examples of pyesgf.search usage
-
-Prelude:
-
-```python
-from pyesgf.search import SearchConnection
-conn = SearchConnection('https://esgf.ceda.ac.uk/esg-search', 
-                        distrib=True)
-```
-
-**Warning**: don't use default search with `facets=*`.
-
-This behavior is kept for backward-compatibility, but ESGF indexes might not
-successfully perform a distributed search when this option is used, so some
-results may be missing.  For full results, it is recommended to pass a list of
-facets of interest when instantiating a context object. For example,
-
-      ctx = conn.new_context(facets='project,experiment_id')
-
-Only the facets that you specify will be present in the `facets_counts` dictionary.
-
-This warning is displayed when a distributed search is performed while using the
-`facets=*` default, a maximum of once per context object.  To suppress this warning,
-set the environment variable `ESGF_PYCLIENT_NO_FACETS_STAR_WARNING` to any value
-or explicitly use `conn.new_context(facets='*')`
-
-```python
-facets='project,experiment_family'
-```
-
-Find how many datasets containing *humidity* in a given experiment family:
-
-```python
-ctx = conn.new_context(project='CMIP5', query='humidity', facets=facets)
-ctx.hit_count
-```
-
-```python
-ctx.facet_counts['experiment_family']
-```
-
-Search using a partial ESGF dataset ID (and get first download URL):
-
-```python
-conn = SearchConnection('https://esgf.ceda.ac.uk/esg-search', distrib=False)
-ctx = conn.new_context(facets=facets)
-dataset_id_pattern = "cmip5.output1.MOHC.HadGEM2-CC.historical.mon.atmos.Amon.*"
-results = ctx.search(query="id:%s" % dataset_id_pattern)
-len(results)
-```
-
-```python
-files = results[0].file_context().search()
-len(files)
-```
-
-```python
-download_url = files[0].download_url
-print(download_url)
-```
-
-Find the OpenDAP URL for an aggregated dataset:
-
-```python
-conn = SearchConnection('http://esgf-data.dkrz.de/esg-search', distrib=False)
-ctx = conn.new_context(project='CMIP5', model='MPI-ESM-LR', experiment='decadal2000', time_frequency='day')
-print('Hits: {}, Realms: {}, Ensembles: {}'.format(
-    ctx.hit_count, 
-    ctx.facet_counts['realm'], 
-    ctx.facet_counts['ensemble']))
-```
-
-```python
-ctx = ctx.constrain(realm='atmos', ensemble='r1i1p1')
-ctx.hit_count
-```
-
-```python
-result = ctx.search()[0]
-agg_ctx = result.aggregation_context()
-agg = agg_ctx.search()[0]
-print(agg.opendap_url)
-
-```
-
-Find download URLs for all files in a dataset:
-
-```python
-conn = SearchConnection('http://esgf-data.dkrz.de/esg-search', distrib=False)
-ctx = conn.new_context(project='obs4MIPs')
-ctx.hit_count
-
-```
-
-```python
-ds = ctx.search()[0]
-files = ds.file_context().search()
-len(files)
-```
-
-```python
-for f in files:
-    print(f.download_url)
-
-```
-
-Define a search for datasets that includes a temporal range:
-
-```python
-conn = SearchConnection('https://esgf.ceda.ac.uk/esg-search', distrib=False)
-ctx = conn.new_context(
-    project="CMIP5", model="HadGEM2-ES",
-    time_frequency="mon", realm="atmos", ensemble="r1i1p1", latest=True,
-    from_timestamp="2100-12-30T23:23:59Z", to_timestamp="2200-01-01T00:00:00Z")
-ctx.hit_count
-```
-
-Or do the same thing by searching without temporal constraints and then applying the constraint:
-
-```python
-ctx = conn.new_context(
-    project="CMIP5", model="HadGEM2-ES",
-    time_frequency="mon", realm="atmos", ensemble="r1i1p1", latest=True)
-ctx.hit_count
-```
-
-```python
-ctx = ctx.constrain(from_timestamp = "2100-12-30T23:23:59Z", to_timestamp = "2200-01-01T00:00:00Z")
-ctx.hit_count
-```
-
----
-
-
-### search.ipynb
-
-## Examples of pyesgf.search usage
-
-Prelude:
-
-```python
-from pyesgf.search import SearchConnection
-conn = SearchConnection('https://esgf.ceda.ac.uk/esg-search', 
-                        distrib=True)
-```
-
-**Warning**: don't use default search with `facets=*`.
-
-This behavior is kept for backward-compatibility, but ESGF indexes might not
-successfully perform a distributed search when this option is used, so some
-results may be missing.  For full results, it is recommended to pass a list of
-facets of interest when instantiating a context object. For example,
-
-      ctx = conn.new_context(facets='project,experiment_id')
-
-Only the facets that you specify will be present in the `facets_counts` dictionary.
-
-This warning is displayed when a distributed search is performed while using the
-`facets=*` default, a maximum of once per context object.  To suppress this warning,
-set the environment variable `ESGF_PYCLIENT_NO_FACETS_STAR_WARNING` to any value
-or explicitly use `conn.new_context(facets='*')`
-
-```python
-facets='project,experiment_family'
-```
-
-Find how many datasets containing *humidity* in a given experiment family:
-
-```python
-ctx = conn.new_context(project='CMIP5', query='humidity', facets=facets)
-ctx.hit_count
-```
-
-```python
-ctx.facet_counts['experiment_family']
-```
-
-Search using a partial ESGF dataset ID (and get first download URL):
-
-```python
-conn = SearchConnection('https://esgf.ceda.ac.uk/esg-search', distrib=False)
-ctx = conn.new_context(facets=facets)
-dataset_id_pattern = "cmip5.output1.MOHC.HadGEM2-CC.historical.mon.atmos.Amon.*"
-results = ctx.search(query="id:%s" % dataset_id_pattern)
-len(results)
-```
-
-```python
-files = results[0].file_context().search()
-len(files)
-```
-
-```python
-download_url = files[0].download_url
-print(download_url)
-```
-
-Find the OpenDAP URL for an aggregated dataset:
-
-```python
-conn = SearchConnection('http://esgf-data.dkrz.de/esg-search', distrib=False)
-ctx = conn.new_context(project='CMIP5', model='MPI-ESM-LR', experiment='decadal2000', time_frequency='day')
-print('Hits: {}, Realms: {}, Ensembles: {}'.format(
-    ctx.hit_count, 
-    ctx.facet_counts['realm'], 
-    ctx.facet_counts['ensemble']))
-```
-
-```python
-ctx = ctx.constrain(realm='atmos', ensemble='r1i1p1')
-ctx.hit_count
-```
-
-```python
-result = ctx.search()[0]
-agg_ctx = result.aggregation_context()
-agg = agg_ctx.search()[0]
-print(agg.opendap_url)
-
-```
-
-Find download URLs for all files in a dataset:
-
-```python
-conn = SearchConnection('http://esgf-data.dkrz.de/esg-search', distrib=False)
-ctx = conn.new_context(project='obs4MIPs')
-ctx.hit_count
-
-```
-
-```python
-ds = ctx.search()[0]
-files = ds.file_context().search()
-len(files)
-```
-
-```python
-for f in files:
-    print(f.download_url)
-
-```
-
-Define a search for datasets that includes a temporal range:
-
-```python
-conn = SearchConnection('https://esgf.ceda.ac.uk/esg-search', distrib=False)
-ctx = conn.new_context(
-    project="CMIP5", model="HadGEM2-ES",
-    time_frequency="mon", realm="atmos", ensemble="r1i1p1", latest=True,
-    from_timestamp="2100-12-30T23:23:59Z", to_timestamp="2200-01-01T00:00:00Z")
-ctx.hit_count
-```
-
-Or do the same thing by searching without temporal constraints and then applying the constraint:
-
-```python
-ctx = conn.new_context(
-    project="CMIP5", model="HadGEM2-ES",
-    time_frequency="mon", realm="atmos", ensemble="r1i1p1", latest=True)
-ctx.hit_count
-```
-
-```python
-ctx = ctx.constrain(from_timestamp = "2100-12-30T23:23:59Z", to_timestamp = "2200-01-01T00:00:00Z")
-ctx.hit_count
-```
-
----
 
 
 # General Information about the ESGF API

@@ -77,10 +77,64 @@ def fetch_esgf_api_docs():
         return md_content
     return ""
 
+def fetch_api_docs():
+    """Fetch and process the ESGF Python Client API documentation."""
+    api_docs_url = "https://esgf-pyclient.readthedocs.io/en/latest/api.html"
+    
+    try:
+        response = requests.get(api_docs_url)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # Extract only the main content area (right side)
+        api_content = soup.find('div', {'class': 'body'})  # This gets just the main content
+        if not api_content:
+            return ""
+            
+        # Process the content to maintain formatting
+        content_md = []
+        
+        # Add the main title
+        content_md.append("# API Reference\n\n")
+        
+        # Process each section
+        for section in api_content.find_all(['div', 'section'], recursive=False):
+            # Handle section titles
+            title = section.find('h1') or section.find('h2') or section.find('h3')
+            if title:
+                level = int(title.name[1])  # h1 -> 1, h2 -> 2, etc.
+                content_md.append(f"{'#' * level} {title.text.strip()}\n\n")
+            
+            # Handle code blocks
+            for code in section.find_all('pre'):
+                content_md.append(f"```python\n{code.text.strip()}\n```\n\n")
+            
+            # Handle warning boxes
+            for warning in section.find_all('div', {'class': 'warning'}):
+                content_md.append(f"> **Warning:**\n> {warning.text.strip()}\n\n")
+            
+            # Handle parameter lists
+            for var_list in section.find_all('dl'):
+                for dt, dd in zip(var_list.find_all('dt'), var_list.find_all('dd')):
+                    param = dt.text.strip()
+                    desc = dd.text.strip()
+                    content_md.append(f"- **{param}** – {desc}\n")
+                content_md.append("\n")
+            
+            # Handle regular paragraphs
+            for p in section.find_all('p', recursive=False):
+                content_md.append(f"{p.text.strip()}\n\n")
+        
+        return "\n".join(content_md)
+        
+    except Exception as e:
+        print(f"Error processing API documentation: {e}")
+        return ""
+
 def fetch_and_process_docs():
     """Main function to fetch and process documentation."""
     # URLs
     concepts_url = "https://github.com/ESGF/esgf-pyclient/blob/master/docs/source/concepts.rst"
+    api_docs_url = "https://esgf-pyclient.readthedocs.io/en/latest/api.html"
     demo_notebooks_url = "https://github.com/ESGF/esgf-pyclient/tree/master/notebooks/demo"
     examples_notebooks_url = "https://github.com/ESGF/esgf-pyclient/tree/master/notebooks/examples"
     
@@ -94,6 +148,13 @@ def fetch_and_process_docs():
         md_content.append("\n---\n")
     except Exception as e:
         print(f"Error processing concepts.rst: {e}")
+    
+    # Add Python Client API documentation
+    md_content.append("\n# ESGF Python Client API Reference\n\n")
+    api_docs = fetch_api_docs()
+    if api_docs:
+        md_content.append(api_docs)
+        md_content.append("\n---\n")
     
     # Process notebooks from both directories
     md_content.append("\n# Code Examples from Notebooks\n\n")

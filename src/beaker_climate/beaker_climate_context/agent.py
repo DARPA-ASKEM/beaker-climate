@@ -85,10 +85,17 @@ class ClimateDataUtilityAgent(BeakerAgent):
         ctx.hit_count
         ```
 
-        In a search, if the user asks you to find something (e.g. humidity, precipitation, etc.), you should use the query argument.
+        In a SEARCH, if the user asks you to find something (e.g. humidity, precipitation, etc.), you should use the query argument.
         You should NEVER use the variable or experiment_id parameters, they are just way too specific. Stuff as much as you can
         into the query parameter and work with the user to refine the query over time. Never, EVER print all the results of a search,
-        it could be HUGE. Collect the results into a variable and slice some for presentation to the user.
+        it could be HUGE. Collect the results into a variable and slice some for presentation to the user. Refer to the search results data
+        model for more information on how to work with it. Note that the only attribute on a search result `DatasetResult`
+        is `dataset_id`, so if you want to capture the results, you can iterate through the results and collect the `dataset_id` of each
+        result. Just note that search results are an iterable, not a list, so you should loop over the first ~10 to 100 results to get a good sample.
+        You can't just slice them! You can check the number of results by calling `ctx.hit_count` which is wise to do before collecting all results.
+
+        For other things, like getting more detail about a dataset or downloading a dataset you should
+        use the instructions available to you in the API documentation.
 
         Additionally, any data downloaded should be downloaded to the './data/' directory.
         Please ensure the code makes sure this location exists, and all downloaded data is saved to this location.
