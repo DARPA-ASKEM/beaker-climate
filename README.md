@@ -13,8 +13,12 @@
 ## Installation
 
 ```console
-pip install beaker-climate
+pip install -e .
+export OPENAI_API_KEY=your key here
+export GEMINI_API_KEY=your key here
 ```
+
+Run with `beaker notebook`
 
 ## License
 

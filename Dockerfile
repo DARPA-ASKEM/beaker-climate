@@ -12,11 +12,9 @@ RUN pip install --upgrade --no-cache-dir hatch pip
 
 COPY --chown=1000:1000 . /jupyter/
 RUN chown -R 1000:1000 /jupyter
+
+
 RUN pip install -e /jupyter
-
-# TODO: remove this once type checking in archytas is released
-RUN pip uninstall -y archytas && pip install --no-cache-dir "archytas @ git+https://github.com/jataware/archytas.git@robust-tool-typing"
-
 
 # Switch to non-root user. It is crucial for security reasons to not run jupyter as root user!
 USER jupyter
