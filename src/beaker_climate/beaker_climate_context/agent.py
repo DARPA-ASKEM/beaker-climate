@@ -51,7 +51,7 @@ class ClimateDataUtilityAgent(BeakerAgent):
         self.logger = MessageLogger(self.context)
         try:
             self.esgf_api_client = AdhocApi(apis=[self.get_esgf_api_client()], 
-                                            drafter_config={'model': 'gemini-1.5-flash-8b'},
+                                            drafter_config={'model': 'gemini-1.5-flash-8b', 'ttl_seconds': 3600},
                                             finalizer_config={'model': 'gpt-4o'},
                                             logger=self.logger,
                                             # run_code=python.run  # don't include so top level agent will run the code itself
@@ -73,11 +73,22 @@ class ClimateDataUtilityAgent(BeakerAgent):
         Be sure to import and instantiate the client for the ESGF API. For example:
         ```python
         from pyesgf.search import SearchConnection
-        conn = SearchConnection('https://esgf.ceda.ac.uk/esg-search',
-                                distrib=True)
-        ctx = conn.new_context(project='CMIP5', query='humidity')
+        ```
+
+        You should always use http://esgf-node.llnl.gov/esg-search as the search node unless it times out.
+
+        When performing a search, you MUST always specify the facets as its own argument. For example:
+
+        ```python
+        facets='project,experiment_family'
+        ctx = conn.new_context(project='CMIP5', query='humidity', facets=facets)
         ctx.hit_count
         ```
+
+        In a search, if the user asks you to find something (e.g. humidity, precipitation, etc.), you should use the query argument.
+        You should NEVER use the variable or experiment_id parameters, they are just way too specific. Stuff as much as you can
+        into the query parameter and work with the user to refine the query over time. Never, EVER print all the results of a search,
+        it could be HUGE. Collect the results into a variable and slice some for presentation to the user.
 
         Additionally, any data downloaded should be downloaded to the './data/' directory.
         Please ensure the code makes sure this location exists, and all downloaded data is saved to this location.
@@ -88,8 +99,7 @@ class ClimateDataUtilityAgent(BeakerAgent):
             'cache_key': 'api_assistant_esgf_client',
             'description': ESGF_DESCRIPTION,
             'documentation': documentation,
-            'proofread_instructions': ESGF_ADDITIONAL_INFO,
-            'drafter_config': {'ttl_seconds': 3600}
+            'proofread_instructions': ESGF_ADDITIONAL_INFO
         }
         return esgf_api_client
 
