@@ -37,6 +37,7 @@ ENV/
 .project
 .pydevproject
 .settings/
+.DS_Store
 
 # Distribution / packaging
 .Python
