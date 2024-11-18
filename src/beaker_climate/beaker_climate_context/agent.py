@@ -50,17 +50,17 @@ class ClimateDataUtilityAgent(BeakerAgent):
         self.here = Path(__file__).parent  
         self.logger = MessageLogger(self.context)
         try:
-            self.esgf_api_client = AdhocApi(apis=[self.get_esgf_api_client()], 
-                                            drafter_config={'model': 'gemini-1.5-flash-8b', 'ttl_seconds': 3600},
+            self.esgf_api_adhoc = AdhocApi(apis=[self.get_esgf_api()], 
+                                            drafter_config={'model': 'gemini-1.5-pro-001', 'ttl_seconds': 3600},
                                             finalizer_config={'model': 'gpt-4o'},
                                             logger=self.logger,
                                             # run_code=python.run  # don't include so top level agent will run the code itself
                                             )
         except ValueError as e:
-            self.esgf_api_client = None     
+            self.esgf_api_adhoc = None     
             
-    def get_esgf_api_client(self) -> APISpec:
-        documentation = (self.here/'api_documentation'/'esgf_documentation.md').read_text()
+    def get_esgf_api(self) -> APISpec:
+        documentation = (self.here/'api_documentation'/'esgf_rest_documentation.md').read_text()
         ESGF_DESCRIPTION = '''\
         The Earth System Grid Federation (ESGF) is a global collaboration that manages and distributes climate and environmental science data. 
         It serves as the primary platform for accessing CMIP (Coupled Model Intercomparison Project) data and other climate model outputs.
@@ -69,63 +69,76 @@ class ClimateDataUtilityAgent(BeakerAgent):
         The system supports authentication, search capabilities, and data transfer protocols optimized for large scientific datasets.
         '''
 
-        ESGF_ADDITIONAL_INFO = '''\
-        Be sure to import and instantiate the client for the ESGF API. For example:
-        ```python
-        from pyesgf.search import SearchConnection
-        ```
+        ESGF_ADDITIONAL_INFO_REST = '''\
+        For download/OpenDAP URLs, the Thredds catalog URL is now DEPRECATED. If you see a URL like:
 
-        You should always use http://esgf-node.llnl.gov/esg-search as the search node unless it times out.
+        https://aims3.llnl.gov/thredds/catalog/esgcet/306/CMIP6.ScenarioMIP.NCAR.CESM2-WACCM.ssp585.r1i1p1f1.Oday.tos.gr.v20190815.xml#CMIP6.ScenarioMIP.NCAR.CESM2-WACCM.ssp585.r1i1p1f1.Oday.tos.gr.v20190815
 
-        When performing a search, you MUST always specify the facets as its own argument. For example:
-
-        ```python
-        facets='project,experiment_family'
-        ctx = conn.new_context(project='CMIP5', query='humidity', facets=facets)
-        ctx.hit_count
-        ```
-
-        In a SEARCH, if the user asks you to find something (e.g. humidity, precipitation, etc.), you should use the query argument.
-        You should NEVER use the variable or experiment_id parameters, they are just way too specific. Stuff as much as you can
-        into the query parameter and work with the user to refine the query over time. Never, EVER print all the results of a search,
-        it could be HUGE. Collect the results into a variable and slice some for presentation to the user. Refer to the search results data
-        model for more information on how to work with it. Note that the only attribute on a search result `DatasetResult`
-        is `dataset_id`, so if you want to capture the results, you can iterate through the results and collect the `dataset_id` of each
-        result. Just note that search results are an iterable, not a list, so you should loop over the first ~10 to 100 results to get a good sample.
-        You can't just slice them! You can check the number of results by calling `ctx.hit_count` which is wise to do before collecting all results.
-
-        For other things, like getting more detail about a dataset or downloading a dataset you should
-        use the instructions available to you in the API documentation.
+        You should reformat it to something like:
+        
+        http://aims3.llnl.gov/thredds/dodsC/cmip6/ScenarioMIP/NCAR/CESM2-WACCM/ssp585/r1i1p1f1/Oday/tos/gr/v20190815/tos_Oday_CESM2-WACCM_ssp585_r1i1p1f1_gr_20150102-21010101.nc
 
         Additionally, any data downloaded should be downloaded to the './data/' directory.
         Please ensure the code makes sure this location exists, and all downloaded data is saved to this location.
-        '''   
+        '''
 
-        esgf_api_client: APISpec = {
+        # ESGF_ADDITIONAL_INFO = '''\
+        # Be sure to import and instantiate the client for the ESGF API. For example:
+        # ```python
+        # from pyesgf.search import SearchConnection
+        # ```
+
+        # You should always use http://esgf-node.llnl.gov/esg-search as the search node unless it times out.
+
+        # When performing a search, you MUST always specify the facets as its own argument. For example:
+
+        # ```python
+        # facets='project,experiment_family'
+        # ctx = conn.new_context(project='CMIP5', query='humidity', facets=facets)
+        # ctx.hit_count
+        # ```
+
+        # In a SEARCH, if the user asks you to find something (e.g. humidity, precipitation, etc.), you should use the query argument.
+        # You should NEVER use the variable or experiment_id parameters, they are just way too specific. Stuff as much as you can
+        # into the query parameter and work with the user to refine the query over time. Never, EVER print all the results of a search,
+        # it could be HUGE. Collect the results into a variable and slice some for presentation to the user. Refer to the search results data
+        # model for more information on how to work with it. Note that the only attribute on a search result `DatasetResult`
+        # is `dataset_id`, so if you want to capture the results, you can iterate through the results and collect the `dataset_id` of each
+        # result. Just note that search results are an iterable, not a list, so you should loop over the first ~10 to 100 results to get a good sample.
+        # You can't just slice them! You can check the number of results by calling `ctx.hit_count` which is wise to do before collecting all results.
+
+        # For other things, like getting more detail about a dataset or downloading a dataset you MUST
+        # use the instructions available to you in the associated API documentation.
+
+        # Additionally, any data downloaded should be downloaded to the './data/' directory.
+        # Please ensure the code makes sure this location exists, and all downloaded data is saved to this location.
+        # '''   
+
+        esgf_api_spec: APISpec = {
             'name': "Earth System Grid Federation (ESGF)",
             'cache_key': 'api_assistant_esgf_client',
             'description': ESGF_DESCRIPTION,
             'documentation': documentation,
-            'proofread_instructions': ESGF_ADDITIONAL_INFO
+            'proofread_instructions': ESGF_ADDITIONAL_INFO_REST
         }
-        return esgf_api_client
+        return esgf_api_spec
 
 
     @tool()
-    async def use_esgf_api_client(self, goal: str, agent: AgentRef, loop: LoopControllerRef, react_context: ReactContextRef) -> str:
+    async def use_esgf_api(self, goal: str, agent: AgentRef, loop: LoopControllerRef, react_context: ReactContextRef) -> str:
         """
-        This tool should be used to submit a request to the ESGF API client. This can be used
+        This tool should be used to submit a request to the ESGF API. This can be used
         for searching for datasets, downloading datasets, etc. This can include climate data such
         as CMIP5, CMIP6, etc.
 
         Args:
-            goal (str): The goal of the interaction with the ESGF API client.
+            goal (str): The goal of the interaction with the ESGF API.
 
         Returns:
-            str: The code generated as a result of the ESGF API client request.
+            str: The code generated as a result of the ESGF API request.
         """
         name = "Earth System Grid Federation (ESGF)"
-        code = self.esgf_api_client.use_api(name, goal)
+        code = self.esgf_api_adhoc.use_api(name, goal)
         self.logger.info(f"running code produced by esgf ad hoc api client: {code}")
         try:
             result = await self.run_code(code, agent=agent, react_context=react_context)
@@ -355,8 +368,7 @@ class ClimateDataUtilityAgent(BeakerAgent):
             str: The code used to plot the netcdf.
         """
 
-        loop.set_state(loop.STOP_SUCCESS)
-        plot_code = agent.context.get_code(
+        code = agent.context.get_code(
             "get_netcdf_plot",
             {
                 "dataset": dataset_variable_name,
@@ -367,12 +379,11 @@ class ClimateDataUtilityAgent(BeakerAgent):
             },
         )
 
-        result = json.dumps(
-            {
-                "action": "code_cell",
-                "language": "python3",
-                "content": plot_code.strip(),
-            }
+        result = await agent.context.evaluate(
+            code,
+            parent_header={},
         )
 
-        return result
+        output = result.get("return")
+
+        return output
