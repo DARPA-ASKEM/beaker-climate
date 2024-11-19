@@ -71,7 +71,7 @@ RUN julia -e 'using Pkg; Pkg.add(["Mimi", "JSON3", "DisplayAs"]); using Mimi'
 
 # Install LLMConvenience from GitHub
 RUN julia -e 'using Pkg; Pkg.add(url="https://github.com/jataware/LLMConvenience.jl.git")'
-RUN julia -e 'using Pkg; Pkg.add(url="https://github.com/fund-model/MimiFUND.jl.git")'
+RUN julia -e 'using Pkg; Pkg.add(url="https://github.com/fund-model/MimiFUND.jl.git"); using MimiFUND'
 
 # Service
 CMD ["python", "-m", "beaker_kernel.server.main", "--ip", "0.0.0.0"]

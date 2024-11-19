@@ -8,6 +8,7 @@ import pandas as pd
 import os
 
 from beaker_kernel.lib.context import BaseContext
+from beaker_kernel.lib import BeakerContext
 from .agent import MimiAgent
 
 if TYPE_CHECKING:
@@ -17,14 +18,14 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
-class MimiContext(BaseContext):
+class MimiContext(BeakerContext):
     compatible_subkernels = ["julia"]
-    slug = "bio"
+    SLUG = "mimi"
     agent_cls: "NewBaseAgent" = MimiAgent
 
     def __init__(
         self,
-        beaker_kernel: "LLMKernel",
+        beaker_kernel: "BeakerKernel",
         config: Dict[str, Any],
     ) -> None:
         self.library_name="Mimi.jl"
