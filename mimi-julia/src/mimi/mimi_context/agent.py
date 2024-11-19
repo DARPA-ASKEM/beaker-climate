@@ -37,6 +37,7 @@ class MimiAgent(BeakerAgent):
             str: List of modules that can be imported with `import`/`using`
         """
         _, _, installed = await agent.context.get_jupyter_context()
+        return installed
 
     @tool(autosummarize=True)
     async def search_package_registries(self, name: str, agent: AgentRef) -> str:
@@ -99,6 +100,7 @@ class MimiAgent(BeakerAgent):
             parent_header={},
         )
         return response["return"]
+  
     
     @tool(autosummarize=True)
     async def get_function_docstring(self, function_name: str, agent: AgentRef):

@@ -33,9 +33,43 @@ class MimiContext(BeakerContext):
         # Custom setup can be done here
         pass
 
+    async def render_code(self, message, code):
+        self.send_response("iopub", "code_cell", {"code": code}, parent_header=message.header)
+
+    async def get_jupyter_context(self):
+        imported_modules=[]
+        variables={}
+        response = await self.evaluate(
+            "import LLMConvenience; LLMConvenience.handle_response(LLMConvenience.session_state())",
+            parent_header={},
+        )
+        jupyter_context=response["return"]
+        variables=jupyter_context['user_vars']
+        imported_modules=jupyter_context['imported_modules']
+
+        response = await self.evaluate(
+            "import LLMConvenience; LLMConvenience.handle_response(LLMConvenience.installed_dependencies())",
+            parent_header={},
+        )
+        installed_dependencies=response["return"]
+
+        return variables, imported_modules, installed_dependencies
+    
+    async def post_execute(self, message):
+        self.variables,self.imported_modules, self.available_modules=await self.get_jupyter_context()
+        self.agent.debug(event_type="update_code_env",content={
+                    "variables": self.variables,
+                })
+        self.agent.debug(event_type="code",content={
+                    "imported_modules": self.imported_modules,
+                })
+        self.agent.debug(event_type="code",content={
+                    "available_modules": self.available_modules,
+                })    
+
     async def auto_context(self):
         from .lib.dynamic_example_selector import query_examples
-        # await self.get_jupyter_context()
+        await self.get_jupyter_context()
         most_recent_user_query=''
         for message in self.agent.messages:
             if message['role']=='user':
