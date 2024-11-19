@@ -1,30 +1,19 @@
-# SPDX-FileCopyrightText: 2024-present Brandon Rose <rose.brandon.m@gmail.com>
-#
-# SPDX-License-Identifier: MIT
-from typing import TYPE_CHECKING
+import json
+import logging
+import re
 
-from archytas.tool_utils import AgentRef, LoopControllerRef, ReactContextRef, tool
-from beaker_kernel.lib import BeakerAgent
+from archytas.tool_utils import AgentRef, LoopControllerRef, ReactContextRef, tool, toolset
 
-if TYPE_CHECKING:
-    from beaker_kernel.kernel import BeakerKernel
+from beaker_kernel.lib.context import BaseContext
+logger = logging.getLogger(__name__)
+from .new_base_agent import NewBaseAgent
+from typing import List
 
+@toolset()
+class Toolset:
+    """Toolset for our context"""
 
-class MimiAgent(BeakerAgent):
-    """
-    You are a helpful agent that will answer questions and help with what is asked of you.
-
-    """
-    # The class docstring is provided to the LLM to set the expectations for the agent and how it should
-
-
-    # async def setup(self, context_info: dict[str, any], )
-
-    # A sample tool to get you started.
-    # Notice that the doc-string provides instructions to the agent about how and when to use the tools along with the
-    # expected inputs and outputs, including the datatype what they represent so the agent knows how to prepare proper
-    # input and how to use the output of the tool.
-    @tool()
+#     @tool(autosummarize=True)
     async def search_installed_packages(self, name: str, agent: AgentRef) -> str:
         """
         Search installed packages using a naive match
@@ -37,7 +26,7 @@ class MimiAgent(BeakerAgent):
             str: List of modules that can be imported with `import`/`using`
         """
         _, _, installed = await agent.context.get_jupyter_context()
-        return installed
+        return str(list(filter(lambda module: name.lower() in module.lower(), installed)))
 
     @tool(autosummarize=True)
     async def search_package_registries(self, name: str, agent: AgentRef) -> str:
@@ -63,6 +52,7 @@ class MimiAgent(BeakerAgent):
         )
         return str(response["return"])
     
+
     @tool(autosummarize=False)
     async def get_model_info(self, model_var_name: str, agent: AgentRef) -> dict:
         """
@@ -100,8 +90,8 @@ class MimiAgent(BeakerAgent):
             parent_header={},
         )
         return response["return"]
-  
-    
+
+
     @tool(autosummarize=True)
     async def get_function_docstring(self, function_name: str, agent: AgentRef):
         """
@@ -140,6 +130,61 @@ class MimiAgent(BeakerAgent):
         docs = response["return"]["docs"]
         return docs
 
+class MimiAgent(NewBaseAgent):
+    """
+    You are assisting us in performing important scientific tasks.
+
+    If you don't have the details necessary, you should use the ask_user tool to ask the user for them.
+    """
+
+    MODEL = "gpt-4o"
+    
+
+    def __init__(self, context: BaseContext = None, tools: list = None, **kwargs):
+        tools = [Toolset]
+        super().__init__(context, tools, **kwargs)
+        self.most_recent_user_query=''
+        self.checked_code=False
+        self.code_attempts=0
+    
+    def send_code(self, code: str, loop: LoopControllerRef) -> str:
+        loop.set_state(loop.STOP_SUCCESS)
+        preamble, code, coda = re.split("```\w*", code)
+        result = json.dumps(
+            {
+                "action": "code_cell",
+                "language": self.context.subkernel.KERNEL_NAME,
+                "content": code.strip(),
+            }
+        )
+        #check if successful then reset check code...
+        return result
+    
+    #no_repl version
+    @tool()
+    async def submit_custom_code(self, code: str, agent: AgentRef, loop: LoopControllerRef, react_context: ReactContextRef) -> None:
+        """
+        Use this when you are ready to submit your custom code to the user. 
+        
+        Use other submit tools if you don't need to generate custom code.
+
+        If there is a package is not yet installed, feel free to suggest a Pkg.add as well.
+        
+        Ensure to handle any required dependencies, and provide a well-documented and efficient solution. Feel free to create helper functions or classes if needed.
+        
+        Please generate the code as if you were programming inside a Jupyter Notebook and the code is to be executed inside a cell.
+        You MUST wrap the code with a line containing three backticks before and after the generated code like the code below but replace the "triple_backticks":
+        ```
+        import DataFrames
+        ```
+
+        No additional text is needed in the response, just the code block with the triple backticks.
+
+        Args:
+            code (str): Julia code block to be submitted to the user inside triple backticks.
+        """
+        return self.send_code(code, loop)  
+    
     @tool()
     async def generate_plot_var_code(self, model_name: str, component_name: str, variable_name: str, agent: AgentRef, loop: LoopControllerRef) -> None: 
         """

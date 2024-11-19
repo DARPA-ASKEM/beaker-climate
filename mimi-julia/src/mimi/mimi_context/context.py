@@ -1,38 +1,44 @@
-# SPDX-FileCopyrightText: 2024-present Brandon Rose <rose.brandon.m@gmail.com>
-#
-# SPDX-License-Identifier: MIT
-from typing import Dict, Any, TYPE_CHECKING
+import logging
+import contextlib
+from importlib import import_module
+import io
+import json
+from typing import TYPE_CHECKING, Any, Dict
+import pandas as pd
+import os
 
-from beaker_kernel.lib import BeakerContext
-from beaker_kernel.lib.utils import action
-
+from beaker_kernel.lib.context import BaseContext
 from .agent import MimiAgent
 
 if TYPE_CHECKING:
-    from beaker_kernel.kernel import BeakerKernel
+    from beaker_kernel.kernel import LLMKernel
+    from .new_base_agent import NewBaseAgent
+    from beaker_kernel.lib.subkernels.base import BaseSubkernel
 
+logger = logging.getLogger(__name__)
 
-class MimiContext(BeakerContext):
-    """
-    Mimi.jl context for Beaker.
-    """
-
+class MimiContext(BaseContext):
     compatible_subkernels = ["julia"]
-    SLUG = "mimi"
+    slug = "bio"
+    agent_cls: "NewBaseAgent" = MimiAgent
 
-    def __init__(self, beaker_kernel: "BeakerKernel", config: Dict[str, Any]):
+    def __init__(
+        self,
+        beaker_kernel: "LLMKernel",
+        config: Dict[str, Any],
+    ) -> None:
         self.library_name="Mimi.jl"
+        self.sub_module_description=[]#self.context_conf.get('library_submodule_descriptions', '')
+        self.functions = {}
+        self.config = config
+        self.variables={}
         self.imported_modules={}
         self.available_modules={}
-        self.sub_module_description=[]
-        self.variables={}
-        self.few_shot_examples=''        
-        super().__init__(beaker_kernel, MimiAgent, config)
-
-    async def setup(self, context_info=None, parent_header=None):
-        # Custom setup can be done here
-        pass
-
+        self.few_shot_examples=''
+        self.code_blocks=[] #{'code':str,'execution_status':not_executed,executed_successfully,'execution_order':int,'output':output from running code block most recent time.}
+        self.code_block_print='\n\n'.join([f'Code Block[{i}]: {self.code_blocks[i]["code"]}\nExecution Status:{self.code_blocks[i]["execution_status"]}\nExecution Order:{self.code_blocks[i]["execution_order"]}\nCode Block Output or Error:{self.code_blocks[i]["output"]}' for i in range(len(self.code_blocks))])
+        super().__init__(beaker_kernel, self.agent_cls, config)
+        
     async def render_code(self, message, code):
         self.send_response("iopub", "code_cell", {"code": code}, parent_header=message.header)
 
@@ -65,8 +71,8 @@ class MimiContext(BeakerContext):
                 })
         self.agent.debug(event_type="code",content={
                     "available_modules": self.available_modules,
-                })    
-
+                })
+    
     async def auto_context(self):
         from .lib.dynamic_example_selector import query_examples
         await self.get_jupyter_context()
@@ -74,6 +80,7 @@ class MimiContext(BeakerContext):
         for message in self.agent.messages:
             if message['role']=='user':
                 most_recent_user_query=message['content']
+        if most_recent_user_query!=self.agent.most_recent_user_query:
             self.few_shot_examples=query_examples(most_recent_user_query)
             self.agent.debug(event_type="few_shot_examples",content={
                         "few_shot_examples": self.few_shot_examples,
@@ -127,3 +134,4 @@ Please answer any user queries or perform user instructions to the best of your 
 """
         result = "\n".join([intro_manual3_few_no_repl_all_classes,code_environment2,outro])
         return result
+    
