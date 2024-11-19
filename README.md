@@ -13,7 +13,20 @@
 ## Installation
 
 ```console
-pip install -e .
+# Install Julia
+curl -fsSL https://install.julialang.org | sh -s -- -y
+export PATH="/root/.julialup/bin:${PATH}"
+
+# Set up Julia environment
+julia -e 'using Pkg; Pkg.add("Mimi"); Pkg.add("JSON3"); Pkg.add("DisplayAs"); using Mimi'
+
+# Install Mimi Julia library
+julia -e 'using Pkg; Pkg.add("Mimi")'
+
+# install beaker-climate contexts
+pip install -e climate-python
+pip install -e mimi-julia
+
 export OPENAI_API_KEY=your key here
 export GEMINI_API_KEY=your key here
 ```

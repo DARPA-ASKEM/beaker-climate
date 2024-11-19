@@ -7,18 +7,71 @@ RUN apt update && apt-get install -y lsof build-essential make gcc g++ git gfort
 ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
 ENV C_INCLUDE_PATH=/usr/include/gdal
 
-# Install Python requirements
-RUN pip install --upgrade --no-cache-dir hatch pip
+# # Install Julia based on architecture
+# RUN apt-get update && apt-get install -y wget && \
+#     case "$(uname -m)" in \
+#         aarch64) \
+#             JULIA_ARCH="aarch64" ;; \
+#         x86_64) \
+#             JULIA_ARCH="x86_64" ;; \
+#         *) \
+#             echo "Unsupported architecture" && exit 1 ;; \
+#     esac && \
+#     wget https://julialang-s3.julialang.org/bin/linux/${JULIA_ARCH}/1.9/julia-1.9.3-linux-${JULIA_ARCH}.tar.gz && \
+#     tar xf julia-1.9.3-linux-${JULIA_ARCH}.tar.gz && \
+#     mv julia-1.9.3 /opt/julia && \
+#     ln -s /opt/julia/bin/julia /usr/local/bin/julia && \
+#     rm julia-1.9.3-linux-${JULIA_ARCH}.tar.gz
 
+# # Set up Julia for jupyter user
+# RUN mkdir -p /home/jupyter/.julia && \
+#     chown -R jupyter:jupyter /home/jupyter/.julia && \
+#     chmod -R 755 /opt/julia
+
+# ENV JULIA_DEPOT_PATH="/home/jupyter/.julia"
+# ENV PATH="/usr/local/bin:${PATH}"
+
+# Install Julia
+RUN wget --no-verbose -O julia.tar.gz "https://julialang-s3.julialang.org/bin/linux/$(uname -m|sed 's/86_//')/1.10/julia-1.10.1-linux-$(uname -m).tar.gz"
+RUN tar -xzf "julia.tar.gz" && mv julia-1.10.1 /opt/julia && \
+    ln -s /opt/julia/bin/julia /usr/local/bin/julia && rm "julia.tar.gz"
+
+# Add Julia to Jupyter
+USER 1000
+RUN julia -e 'using Pkg; Pkg.add("IJulia");'
+
+# Install Julia requirements
+RUN julia -e ' \
+    packages = [ \
+        "DataSets", "XLSX", "Plots", "Downloads", "DataFrames", "ImageShow", "FileIO", "Mimi", "JSON3", "DisplayAs"  \
+    ]; \
+    using Pkg; \
+    Pkg.add(packages);'
+
+# Back to root for Python package install
+USER root
+
+# Copy project files
 COPY --chown=1000:1000 . /jupyter/
 RUN chown -R 1000:1000 /jupyter
 
+# Install Python requirements
+RUN pip install --upgrade --no-cache-dir hatch pip
+RUN pip install -e /jupyter/climate-python
+RUN pip install -e /jupyter/mimi-julia
 
-RUN pip install -e /jupyter
-
-# Switch to non-root user. It is crucial for security reasons to not run jupyter as root user!
+# Switch to jupyter user and install Julia packages
 USER jupyter
 WORKDIR /jupyter
+
+RUN julia -e 'using Pkg; Pkg.add("IJulia");'
+
+# Install required Julia packages (these are used in the procedures/*.jl files)
+RUN julia -e 'using Pkg; Pkg.add(["Mimi", "JSON3", "DisplayAs"]); using Mimi'
+
+# Install LLMConvenience from GitHub
+RUN julia -e 'using Pkg; Pkg.add(url="https://github.com/jataware/LLMConvenience.jl.git")'
+RUN julia -e 'using Pkg; Pkg.add(url="https://github.com/fund-model/MimiFUND.jl.git"); using MimiFUND'
 
 # Service
 CMD ["python", "-m", "beaker_kernel.server.main", "--ip", "0.0.0.0"]
