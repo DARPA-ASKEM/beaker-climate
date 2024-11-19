@@ -124,7 +124,7 @@ class Toolset:
                 )
             end
         """
-        response = await agent.context.beaker_kernel.evaluate(
+        response = await agent.context.evaluate(
             code,
             parent_header={},
         )
