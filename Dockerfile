@@ -7,30 +7,6 @@ RUN apt update && apt-get install -y lsof build-essential make gcc g++ git gfort
 ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
 ENV C_INCLUDE_PATH=/usr/include/gdal
 
-# # Install Julia based on architecture
-# RUN apt-get update && apt-get install -y wget && \
-#     case "$(uname -m)" in \
-#         aarch64) \
-#             JULIA_ARCH="aarch64" ;; \
-#         x86_64) \
-#             JULIA_ARCH="x86_64" ;; \
-#         *) \
-#             echo "Unsupported architecture" && exit 1 ;; \
-#     esac && \
-#     wget https://julialang-s3.julialang.org/bin/linux/${JULIA_ARCH}/1.9/julia-1.9.3-linux-${JULIA_ARCH}.tar.gz && \
-#     tar xf julia-1.9.3-linux-${JULIA_ARCH}.tar.gz && \
-#     mv julia-1.9.3 /opt/julia && \
-#     ln -s /opt/julia/bin/julia /usr/local/bin/julia && \
-#     rm julia-1.9.3-linux-${JULIA_ARCH}.tar.gz
-
-# # Set up Julia for jupyter user
-# RUN mkdir -p /home/jupyter/.julia && \
-#     chown -R jupyter:jupyter /home/jupyter/.julia && \
-#     chmod -R 755 /opt/julia
-
-# ENV JULIA_DEPOT_PATH="/home/jupyter/.julia"
-# ENV PATH="/usr/local/bin:${PATH}"
-
 # Install Julia
 RUN wget --no-verbose -O julia.tar.gz "https://julialang-s3.julialang.org/bin/linux/$(uname -m|sed 's/86_//')/1.10/julia-1.10.1-linux-$(uname -m).tar.gz"
 RUN tar -xzf "julia.tar.gz" && mv julia-1.10.1 /opt/julia && \
