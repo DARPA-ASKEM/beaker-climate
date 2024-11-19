@@ -13,7 +13,7 @@ from typing import List
 class Toolset:
     """Toolset for our context"""
 
-#     @tool(autosummarize=True)
+    @tool(autosummarize=True)
     async def search_installed_packages(self, name: str, agent: AgentRef) -> str:
         """
         Search installed packages using a naive match
@@ -31,9 +31,10 @@ class Toolset:
     @tool(autosummarize=True)
     async def search_package_registries(self, name: str, agent: AgentRef) -> str:
         """
-        Search packages that can be installed using `Pkg.add` using a naive match (occursin)
+        Search packages that can be installed from Julia's package registries using `Pkg.add` using a naive match (occursin)
 
-        It might be worth checking installed packages first.
+        Before using this tool, it is worth checking if the package/library is already installed. You can do this by
+        running the `search_installed_packages` tool.
 
         E.g. Searching using the name "X" might return ["MimiX"] which is the name of the IAM
         
