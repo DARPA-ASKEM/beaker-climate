@@ -44,21 +44,23 @@ class MimiContext(BeakerContext):
         self.send_response("iopub", "code_cell", {"code": code}, parent_header=message.header)
 
     async def get_jupyter_context(self):
-        imported_modules=[]
-        variables={}
+        imported_modules = []
+        variables = {}
         response = await self.evaluate(
             "import LLMConvenience; LLMConvenience.handle_response(LLMConvenience.session_state())",
             parent_header={},
         )
-        jupyter_context=response["return"]
-        variables=jupyter_context['user_vars']
-        imported_modules=jupyter_context['imported_modules']
+        jupyter_context = json.loads(response["return"]) if isinstance(response["return"], str) else response["return"]
+        
+        if jupyter_context is not None:
+            variables = jupyter_context.get('user_vars', {})
+            imported_modules = jupyter_context.get('imported_modules', [])
 
         response = await self.evaluate(
             "import LLMConvenience; LLMConvenience.handle_response(LLMConvenience.installed_dependencies())",
             parent_header={},
         )
-        installed_dependencies=response["return"]
+        installed_dependencies = json.loads(response["return"]) if isinstance(response["return"], str) else response["return"]
 
         return variables, imported_modules, installed_dependencies
     
