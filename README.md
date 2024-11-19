@@ -20,8 +20,11 @@ export PATH="/root/.julialup/bin:${PATH}"
 # Set up Julia environment
 julia -e 'using Pkg; Pkg.add("Mimi"); Pkg.add("JSON3"); Pkg.add("DisplayAs"); using Mimi'
 
-# Install Mimi Julia library
-julia -e 'using Pkg; Pkg.add("Mimi")'
+# Install MimiFUND Julia library
+julia -e 'using Pkg; Pkg.add(url="https://github.com/fund-model/MimiFUND.jl.git"); using MimiFUND'
+
+# Install LLMConvenience library 
+julia -e 'using Pkg; Pkg.add(url="https://github.com/jataware/LLMConvenience.jl.git")'
 
 # install beaker-climate contexts
 pip install -e climate-python
