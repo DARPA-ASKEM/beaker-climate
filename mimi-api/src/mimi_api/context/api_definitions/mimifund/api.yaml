@@ -25,19 +25,35 @@ modification:
     file: mimi_modification.md
 existing_model:
     file: mimi_existing_model.md
+components: 
+    file: components.md
+parameters:
+    file: parameters.md
 cache_body: 
     default: true 
 instructions: |
-    This is a julia library. You will be reading the documentation and writing Julia code to interface with the library.
+    This is a Julia library. You will be reading the documentation and writing Julia code to interface with the library.
 
-    Refer to the general Mimi documentation provided below.
+    If you are running an existing model, refer to the documentation below, provided in backticks.
 
-    {mimi}
-
-    If you are running an existing model, refer to the documentation below.
-
+    ```
     {existing_model}
+    ```
 
-    If you are asked to modify parameters, refer to the documentation below. 
+    If you are asked to modify parameters or do something involving Components, refer to the documentation below. 
 
+    ```
     {modification}
+    ```
+
+    A list of Components valid for use with MimiFUND are provided below in backticks.
+
+    ```
+    {components}
+    ```
+
+    A list of Parameter Names valid for use with MimiFUND are provided below in backticks.
+
+    ```
+    {parameters}
+    ```
