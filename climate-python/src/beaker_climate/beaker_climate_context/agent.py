@@ -60,7 +60,7 @@ class ClimateDataUtilityAgent(BeakerAgent):
             self.esgf_api_adhoc = None     
             
     def get_esgf_api(self) -> APISpec:
-        documentation = (self.here/'api_documentation'/'esgf_rest_documentation.md').read_text()
+        documentation = (self.here/'api_documentation'/'esgf_documentation.md').read_text()
         ESGF_DESCRIPTION = '''\
         The Earth System Grid Federation (ESGF) is a global collaboration that manages and distributes climate and environmental science data. 
         It serves as the primary platform for accessing CMIP (Coupled Model Intercomparison Project) data and other climate model outputs.
@@ -69,14 +69,12 @@ class ClimateDataUtilityAgent(BeakerAgent):
         The system supports authentication, search capabilities, and data transfer protocols optimized for large scientific datasets.
         '''
 
-        ESGF_ADDITIONAL_INFO_REST = '''\
-        For download/OpenDAP URLs, the Thredds catalog URL is now DEPRECATED. If you see a URL like:
+        ESGF_ADDITIONAL_INFO_REST = f'''\
+        You will be using climate-search, a REST interface for ESGF and downloading CMIP datasets.
 
-        https://aims3.llnl.gov/thredds/catalog/esgcet/306/CMIP6.ScenarioMIP.NCAR.CESM2-WACCM.ssp585.r1i1p1f1.Oday.tos.gr.v20190815.xml#CMIP6.ScenarioMIP.NCAR.CESM2-WACCM.ssp585.r1i1p1f1.Oday.tos.gr.v20190815
+        The base URL is http://climate:8000/.
 
-        You should reformat it to something like:
-        
-        http://aims3.llnl.gov/thredds/dodsC/cmip6/ScenarioMIP/NCAR/CESM2-WACCM/ssp585/r1i1p1f1/Oday/tos/gr/v20190815/tos_Oday_CESM2-WACCM_ssp585_r1i1p1f1_gr_20150102-21010101.nc
+        {documentation}
 
         Additionally, any data downloaded should be downloaded to the './data/' directory.
         Please ensure the code makes sure this location exists, and all downloaded data is saved to this location.
@@ -115,10 +113,10 @@ class ClimateDataUtilityAgent(BeakerAgent):
         # '''   
 
         esgf_api_spec: APISpec = {
-            'name': "Earth System Grid Federation (ESGF)",
-            'cache_key': 'api_assistant_esgf_client',
+            'name': "Earth System Grid Federation (ESGF) Climate Search",
+            'cache_key': 'api_assistant_esgf_climate_search',
             'description': ESGF_DESCRIPTION,
-            'documentation': documentation,
+            'documentation': ESGF_ADDITIONAL_INFO_REST,
             'proofread_instructions': ESGF_ADDITIONAL_INFO_REST
         }
         return esgf_api_spec
@@ -137,7 +135,7 @@ class ClimateDataUtilityAgent(BeakerAgent):
         Returns:
             str: The code generated as a result of the ESGF API request.
         """
-        name = "Earth System Grid Federation (ESGF)"
+        name = "Earth System Grid Federation (ESGF) Climate Search"
         code = self.esgf_api_adhoc.use_api(name, goal)
         self.logger.info(f"running code produced by esgf ad hoc api client: {code}")
         try:

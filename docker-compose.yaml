@@ -24,3 +24,9 @@ services:
       - ./mimi-julia:/jupyter/mimi-julia
     working_dir: /jupyter
     command: ["beaker", "dev", "watch", "--ip", "0.0.0.0"]
+    networks:
+      - climate 
+
+networks:
+  climate:
+    name: climate_network

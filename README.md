@@ -36,6 +36,10 @@ export GEMINI_API_KEY=your key here
 
 Run with `beaker notebook`
 
+### Climate Search
+
+Ensure `darpa-askem/climate-data` is running on the `climate` network through docker-compose. 
+
 ## License
 
 `beaker-climate` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
