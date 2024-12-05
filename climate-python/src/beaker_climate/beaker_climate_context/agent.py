@@ -76,6 +76,10 @@ class ClimateDataUtilityAgent(BeakerAgent):
 
         {documentation}
 
+        The filesize in bytes of the dataset is in the `size` field of the metadata. Listing metadata attributes about datasets to the user is very useful. Convert sizes to human readable values such as MB or GB, as well as when asked to describe the dataset, mention coordinates, frequency, and resolution as important details.
+        **If the user asks for information, mention filesize in human readable units, frequency, resolution, and variable. Summarize the metadata, DO NOT print it to the console.**
+
+
         Additionally, any data downloaded should be downloaded to the './data/' directory.
         Please ensure the code makes sure this location exists, and all downloaded data is saved to this location.
         '''
