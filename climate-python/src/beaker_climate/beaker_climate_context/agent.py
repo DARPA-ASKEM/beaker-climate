@@ -19,6 +19,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 from time import sleep
+from .search.esgf_search import ESGFProvider
 
 class ClimateDataUtilityAgent(BeakerAgent):
     """
@@ -38,35 +39,11 @@ class ClimateDataUtilityAgent(BeakerAgent):
             with open(documentation_path, 'r') as f:
                 try:
                     self.add_context(f'''\
-        Provided below is the comprehensive documentation of the climate-search API that you have access to.
-        ALWAYS reference this when using the climate-search API.                             
-    ```
-    {f.read()}
-    ```
-''')
-                    initial_context_msg_added = True
-                except Exception as e:
-                    sleep(0.5)
-       
-    @tool()
-    async def search_esgf(self, code: str, agent: AgentRef, loop: LoopControllerRef, react_context: ReactContextRef) -> str:
-        """
-        This tool should be used to write python code that makes a request to the climate-search API. 
-        The base URL is http://climate:8000/.
-        
-        Be sure to import requests at the top of the code block.
-
-        You will be using climate-search, a REST interface for ESGF operations like searching and downloading CMIP datasets.               
-        This API interfaces with ESGF.
-                       
         The Earth System Grid Federation (ESGF) is a global collaboration that manages and distributes climate and environmental science data. 
         It serves as the primary platform for accessing CMIP (Coupled Model Intercomparison Project) data and other climate model outputs.
         The federation provides a distributed database and delivery system for climate science data, particularly model outputs and observational data.
         Through ESGF, users can search, discover and access climate datasets from major modeling centers and research institutions worldwide.
         The system supports authentication, search capabilities, and data transfer protocols optimized for large scientific datasets.
-        
-        If you perform a search over datasets, be sure to 
-        Pass the results of the search endpoint to the `summarize_search_metadata` tool afterward.
 
         If datasets are loaded, use xarray with the OpenDAP URL.
         If the user asks to download a dataset, ask them if they are sure they want to download it.
@@ -74,37 +51,72 @@ class ClimateDataUtilityAgent(BeakerAgent):
         Additionally, any data downloaded should be downloaded to the './data/' directory.
         Please ensure the code makes sure this location exists, and all downloaded data is saved to this location.
 
-        Args:
-            code (str): The python code to be ran that makes one or more climate-search API requests.
-                        **You will be writing python code to make these requests.**
-        Returns:
-            str: A summary of the run, along with the collected stdout, stderr, returned result, display_data items, and any
-                 errors that may have occurred.
+        Provided below is the comprehensive documentation of the climate-search tools that you have access to.
+        ALWAYS reference this when using the climate-search tools.                             
+    ```
+    {f.read()}
+    ```
+''')
+                    initial_context_msg_added = True
+                except Exception as e:
+                    sleep(0.5)
+        self.esgf = ESGFProvider(self.oneshot)
+        
+       
+    @tool()
+    async def search(self, query: str, agent: AgentRef, loop: LoopControllerRef, react_context: ReactContextRef) -> dict:
         """
-        try:
-            result = await self.tools['run_code'](code, agent=agent, loop=loop, react_context=react_context)
-            return result
+        This tool searches ESGF for datasets.
+        Save the UNMODIFIED JSON output to a variable in the user's notebook.
+
+        Args:
+            query (str): The user's query to pass to the climate search tool.
+        Returns:
+            dict: ESGF unmodified JSON output to be saved to a variable in the notebook.
+        """
+        try: 
+            json = await self.esgf.tool_search(query)
+            return json
         except Exception as e:
-            self.logger.error(f"error in using ESGF client api: {e}")
-            raise e
+            self.add_context(f"The tool failed with this error: {str(e)}. I need to inform the user about this immediately before deciding what to do next. I need to tell the user the exact error with zero summarization.") 
+            return {}
+        
+
+
+    # @tool()
+    # async def show_search_metadata(self, results: str) -> str:
+    #     '''
+    #     You will show the search metadata for the datasets and make a markdown-formatted representation of the metadata.
+
+    #     Refer to the climate-search API documentation you understand if there are questions.
+
+    #     List only the first few datasets returned. 
+    #     Listing metadata attributes about datasets to the user is very useful. 
+    #     When asked to describe the dataset, mention coordinates, frequency, and resolution as important details.
+
+    #     Args:
+    #         results (str): JSON returned from the search endpoint.
+    #     Returns:
+    #         str: markdown formatted representation of the metadata in human readable units
+    #     '''
+    #     return results
 
     @tool()
-    async def summarize_search_metadata(self, results: str) -> str:
-        '''
-        You wil summarize the search metadata for the datasets and make a markdown-formatted summary of the metadata.
-
-        Refer to the climate-search API documentation you understand if there are questions.
-
-        The filesize in bytes of the dataset is in the `size` field of the metadata. Listing metadata attributes about datasets to the user is very useful. Convert sizes to human readable values such as MB or GB, as well as when asked to describe the dataset, mention coordinates, frequency, and resolution as important details.
-        **If the user asks for information, mention filesize in human readable units, frequency, resolution, and variable. Summarize the metadata, DO NOT print it to the console.**
-
+    async def fetch(self, dataset_id: str, agent: AgentRef, loop: LoopControllerRef, react_context: ReactContextRef) -> dict:
+        """
+        This tool fetches URLS for datasets.
+        
         Args:
-            results (str): JSON returned from the search endpoint.
+            dataset_id (str): The user's query to pass to the climate search tool.
         Returns:
-            str: markdown formatted summary of the metadata in human readable units
-        '''
-        return results
-
+            dict: ESGF fetch results
+        """
+        try:
+            return self.esgf.tool_fetch(dataset_id)
+        except Exception as e:
+            self.add_context(f"The tool failed with this error: {str(e)}. I should inform the user immediately with the full text of the error.")
+            return {}
+        
     @tool()
     async def regrid_dataset(
         self,
