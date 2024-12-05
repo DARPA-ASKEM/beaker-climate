@@ -1,41 +1,56 @@
-# beaker-climate
+# beaker-climate - an extension for [Beaker notebooks](https://github.com/jataware/beaker-kernel)
 
 [![PyPI - Version](https://img.shields.io/pypi/v/beaker-climate.svg)](https://pypi.org/project/beaker-climate)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/beaker-climate.svg)](https://pypi.org/project/beaker-climate)
-
 -----
 
 ## Table of Contents
 
+- [About Beaker](#about-beaker)
 - [Installation](#installation)
-- [License](#license)
+
+
+## About Beaker
+
+Beaker provides Contextually-aware notebooks with built-in AI assistant. It is built atop Jupyter, leveraging the deep Jupyter ecosystem.
+
+It consists of multiple aspects, including:
+- A server for hosting/running Beaker/Jupyter sessions.
+- The Beaker kernel, an advanced Jupyter Kernel.
+- Beaker-TS, a TypeScript/JavaScript library.
+- A Vue based, reactive, extensible UI interface.
+- Beaker-Vue, a Vue3 component library for building your own UIs with minimal hassle.
+
+Beaker can be extended with new [contexts](https://jataware.github.io/beaker-kernel/contexts.html) and [subkernels](https://jataware.github.io/beaker-kernel/subkernels.html)
+
+Learn more in the [Beaker documentation](https://jataware.github.io/beaker-kernel/).
 
 ## Installation
 
+To add any contained contexts or subkernels to Beaker, you simply need to install this package. The provided elements will be available in Beaker upon next start.
+
+### PyPI install (if deployed)
 ```console
-# Install Julia
-curl -fsSL https://install.julialang.org | sh -s -- -y
-export PATH="/root/.julialup/bin:${PATH}"
-
-# Set up Julia environment
-julia -e 'using Pkg; Pkg.add("Mimi"); Pkg.add("JSON3"); Pkg.add("DisplayAs"); Pkg.add("IJulia"); using Mimi'
-
-# Install MimiFUND Julia library
-julia -e 'using Pkg; Pkg.add(url="https://github.com/fund-model/MimiFUND.jl.git"); using MimiFUND'
-
-# Install LLMConvenience library 
-julia -e 'using Pkg; Pkg.add(url="https://github.com/jataware/LLMConvenience.jl.git")'
-
-# install beaker-climate contexts
-pip install -e climate-python
-pip install -e mimi-julia
-
-export OPENAI_API_KEY=your key here
-export GEMINI_API_KEY=your key here
+pip install beaker-climate
 ```
 
-Run with `beaker notebook`
+### beaker CLI (installs project in dev mode)
+```console
+beaker project update beaker-climate
+```
 
-## License
+### local pip dev mode install
+```console
+cd beaker-climate
+pip install -e .
+```
 
-`beaker-climate` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+### local pip install
+```console
+cd beaker-climate
+pip install .
+```
+
+### Note
+Some changes, such as adding or moving a context require updating/reinstalling the project.
+You should run `beaker project update` if you encounter issues after making updates to the project.
