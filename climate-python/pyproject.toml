@@ -40,6 +40,7 @@ dependencies = [
   "netcdf4~=1.6.5",
   "cftime~=1.6.3",
   "adhoc-api~=0.2.7",
+  "dask"
 ]
 
 [project.urls]
