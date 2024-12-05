@@ -28,6 +28,10 @@ class MimiApiAgent(BaseAgent):
     """
     You are a chat assistant that helps the user with their questions. You are running inside of Beaker which is a chat application
     sitting on top of a Jupyter notebook. You will be working with Julia and not the other languages. Prefer running code to only generating it.
+
+    If a question the user asks relates to an API you have access to, make sure to use the tool to ask about that API to gather information for the user.
+
+    If a request is relevant to an API you have access to, DO NOT run a placeholder simulation and instead ensure that you use the API.
     """
 
     def __init__(self, context: BaseContext = None, tools: list | None = None, **kwargs):
@@ -49,7 +53,38 @@ class MimiApiAgent(BaseAgent):
             self.add_context(f"The APIs failed to load for this reason: {str(e)}. Please inform the user immediately.")
             self.api = None
 
-        self.add_context(f"The APIs available to you are: \n{[spec['name'] for spec in specs]}")
+        api_descriptions = '\n'.join([f'''{spec["name"]}: {spec["description"]}''' for spec in specs])
+
+        self.add_context(f"""\
+            The APIs available to you are: 
+                {[spec['name'] for spec in specs]}.
+            For details about each one, here are descriptions for what is relevant to the given API.
+                {api_descriptions}
+        """)
+    
+    @tool 
+    def list_apis(self) -> dict:
+        """
+        This tool lists all the APIs available to you.
+
+        Returns:
+            dict: A dict mapping from API names to their descriptions
+        """
+        return self.api.list_apis()
+
+    @tool
+    def ask_api(self, api: str, query: str) -> str:
+        """
+        Ask a question about the API to get more information.
+
+        Args:
+            api (str): The name of the API to ask about
+            query (str): The question to ask
+
+        Returns:
+            str: The response to the query
+        """
+        return self.api.ask_api(api, query)
 
     @tool()
     async def use_api(self, api: str, goal: str, agent: AgentRef, loop: LoopControllerRef, react_context: ReactContextRef) -> str:
