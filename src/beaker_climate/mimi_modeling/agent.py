@@ -24,7 +24,7 @@ from .yaml_loader import load, MessageLogger
 
 logger = logging.getLogger(__name__)
 
-class MimiApiAgent(BaseAgent):
+class MimiModelingAgent(BaseAgent):
     """
     You are a chat assistant that helps the user with their questions. You are running inside of Beaker which is a chat application
     sitting on top of a Jupyter notebook. You will be working with Julia and not the other languages. Prefer running code to only generating it.
@@ -56,13 +56,13 @@ class MimiApiAgent(BaseAgent):
         api_descriptions = '\n'.join([f'''{spec["name"]}: {spec["description"]}''' for spec in specs])
 
         self.add_context(f"""\
-            The APIs available to you are: 
+            The APIs available to you are:
                 {[spec['name'] for spec in specs]}.
             For details about each one, here are descriptions for what is relevant to the given API.
                 {api_descriptions}
         """)
-    
-    @tool 
+
+    @tool
     def list_apis(self) -> dict:
         """
         This tool lists all the APIs available to you.
@@ -102,13 +102,13 @@ class MimiApiAgent(BaseAgent):
                  trying to fix the code yourself rather than reusing the tool.
         """
         self.logger.info("using api")
-        try: 
+        try:
             code = self.api.use_api(api, goal)
         except Exception as e:
             if self.api is None:
                 return "Do not attempt to fix this result: there is no API key for the agent that creates the request. Inform the user that they need to specify GEMINI_API_KEY and consider this a successful tool invocation."
             self.logger.error(str(e))
-            
+
         self.logger.info(f"running code from rc2 {code}")
         try:
             result = await self.run_code(code, agent=agent, react_context=react_context)
