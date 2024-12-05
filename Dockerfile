@@ -33,8 +33,7 @@ RUN chown -R 1000:1000 /jupyter
 
 # Install Python requirements
 RUN pip install --upgrade --no-cache-dir hatch pip
-RUN pip install -e /jupyter/climate-python
-RUN pip install -e /jupyter/mimi-api
+RUN pip install -e /jupyter/
 
 # Switch to jupyter user and install Julia packages
 USER jupyter
