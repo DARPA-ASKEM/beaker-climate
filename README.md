@@ -1,81 +1,56 @@
-# beaker-climate
+# beaker-climate - an extension for [Beaker notebooks](https://github.com/jataware/beaker-kernel)
 
 [![PyPI - Version](https://img.shields.io/pypi/v/beaker-climate.svg)](https://pypi.org/project/beaker-climate)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/beaker-climate.svg)](https://pypi.org/project/beaker-climate)
-
 -----
 
 ## Table of Contents
 
+- [About Beaker](#about-beaker)
 - [Installation](#installation)
-- [License](#license)
-- [Usage](#usage)
-    - [Mimi](#mimi) 
 
-## Installation 
 
-### Docker
+## About Beaker
 
-```docker-compose up```
+Beaker provides Contextually-aware notebooks with built-in AI assistant. It is built atop Jupyter, leveraging the deep Jupyter ecosystem.
 
-This will run Beaker with the contexts installed.
-Ensure `.env` is created in the working directory with the correct keys.
+It consists of multiple aspects, including:
+- A server for hosting/running Beaker/Jupyter sessions.
+- The Beaker kernel, an advanced Jupyter Kernel.
+- Beaker-TS, a TypeScript/JavaScript library.
+- A Vue based, reactive, extensible UI interface.
+- Beaker-Vue, a Vue3 component library for building your own UIs with minimal hassle.
 
-### Existing Beaker Installation
+Beaker can be extended with new [contexts](https://jataware.github.io/beaker-kernel/contexts.html) and [subkernels](https://jataware.github.io/beaker-kernel/subkernels.html)
 
-```
-pip install -e climate-python
-pip install -e mimi-api
-```
+Learn more in the [Beaker documentation](https://jataware.github.io/beaker-kernel/).
 
-### Manual
+## Installation
 
+To add any contained contexts or subkernels to Beaker, you simply need to install this package. The provided elements will be available in Beaker upon next start.
+
+### PyPI install (if deployed)
 ```console
-# Install Julia
-curl -fsSL https://install.julialang.org | sh -s -- -y
-export PATH="/root/.julialup/bin:${PATH}"
-
-# Set up Julia environment
-julia -e ' \
-    packages = [ \
-        "DataSets", "XLSX", "Plots", "Downloads", "DataFrames", "ImageShow", "FileIO", "Mimi", "JSON3", "DisplayAs"  \
-    ]; \
-    using Pkg; \
-    Pkg.add(packages);'
-
-# Install MimiFUND Julia library
-julia -e 'using Pkg; Pkg.add(url="https://github.com/fund-model/MimiFUND.jl.git"); using MimiFUND'
-
-# install beaker-climate contexts
-pip install -e climate-python
-pip install -e mimi-julia
-
-export OPENAI_API_KEY=your key here
-export GEMINI_API_KEY=your key here
+pip install beaker-climate
 ```
 
-Run with `beaker notebook`
+### beaker CLI (installs project in dev mode)
+```console
+beaker project update beaker-climate
+```
 
-## Usage
+### local pip dev mode install
+```console
+cd beaker-climate
+pip install -e .
+```
 
-### Mimi
+### local pip install
+```console
+cd beaker-climate
+pip install .
+```
 
-Inside the `mimi_api` context, Mimi integrated assessment models can be used.
-
-**MimiFUND**:  
-
-Example questions for the agent:
-
-> "What is a FUND model?"
-
-> "How do FUND models calculate social cost?"
-
-> "What parameters matter in calculating the social cost of CO2?"
-
-> "Can you calculate the social cost of CH4 starting at the year 1995?"
-
-> "Can you calculate the social cost of CO2 with n = 5 monte carlo simulations and plot the result?"
-
-## License
-
-`beaker-climate` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.
+### Note
+Some changes, such as adding or moving a context require updating/reinstalling the project.
+You should run `beaker project update` if you encounter issues after making updates to the project.
