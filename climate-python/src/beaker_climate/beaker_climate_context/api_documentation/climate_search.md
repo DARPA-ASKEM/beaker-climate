@@ -49,7 +49,7 @@ By default, climate-data will search all possible given mirrors for reliability 
 `/search/esgf`
 
 Required Parameters:
-  * `query`: Natural language string with search terms to retrieve datasets for. 
+* `query`: Natural language string with search terms to retrieve datasets for. 
 
 Example: `/search/esgf?query=historical eastward wind 100 km cesm2 r11i1p1f1 cfday`
 
@@ -84,15 +84,15 @@ The `metadata` field contains an `id` field that is used for subsequent processi
 `/preview/esgf`
 
 Required Parameters:
-  * `dataset_id`: ID of the dataset provided by search in full format **OR** a Terarium HMI dataset UUID. 
+* `dataset_id`: ID of the dataset provided by search in full format **OR** a Terarium HMI dataset UUID. 
 
 Optional Parameters:
-  * `variable_id`: override the variable to render in the preview. 
-  * `timestamps`: plot over a list of times. 
-    * The format should be `start,end` -- two values, comma separated.
-    * Example: `1970,1979`
-  * `time_index`: override time index to use. 
-  * `analyze`: *bool*, optional, default: false: if true, extracts metadata from a Terarium HMI dataset UUID attempting to gather information about the netcdf/HDF5 structure. adds a return field `metadata` containing information. 
+* `variable_id`: override the variable to render in the preview. 
+* `timestamps`: plot over a list of times. 
+  * The format should be `start,end` -- two values, comma separated.
+  * Example: `1970,1979`
+* `time_index`: override time index to use. 
+* `analyze`: *bool*, optional, default: false: if true, extracts metadata from a Terarium HMI dataset UUID attempting to gather information about the netcdf/HDF5 structure. adds a return field `metadata` containing information. 
 
 Output:  
 ```json
@@ -119,32 +119,32 @@ Output:
 `/subset/esgf`
 
 Required Parameters:
-  * `dataset_id`: ID of the dataset provided by search in full format. 
+* `dataset_id`: ID of the dataset provided by search in full format. 
 
 Optional Parameters:
-  * `parent_dataset_id`: Terarium parent dataset ID - retains provenance info stored in the metadata, so that the subset can keep a pointer to the original it was created from.
-  * `timestamps`: 
-    * String of two ISO-8601 timestamps or the terms `start` or `end` separated by commas.
-    * Examples:
-      * `timestamps=2000-01-01T00:00:00,2010-01-01T00:00:00`
-      * `timestamps=start,2010-01-01T00:00:00`
-      * `timestamps=1999-01-01T00:00:00,end`
-  * `envelope`:
-    * Geographical envelope provided as a comma-separated series of 4 degrees: lon, lon, lat, lat. 
-    * Examples:
-      * `envelope=90,95,90,100`
-        * Restrict output data to the longitude range [90 deg, 95 deg] and latitude range [90 deg, 100 deg]
-  * `thin_factor`:
-    * Take every nth datapoint along specified fields given by `thin_fields` (defaulting to all).
-    * Examples:
-      * `thin_factor=2`
-        * Take every other data point in every field
-      * `thin_factor=3&thin_fields=lat,lon`
-        * Preserving all other fields, take every third data point from the fields `lat` and `lon`
-      * `thin_factor=2&thin_fields=!time,lev`
-        * Preserving all other fields, take every other data point from all fields *except* `time` and `lev`. 
-  * `variable_id`:
-    * Which variable to render in the preview. Defaults to `""`. Will attempt to choose the best relevant variable if none is specified.
+* `parent_dataset_id`: Terarium parent dataset ID - retains provenance info stored in the metadata, so that the subset can keep a pointer to the original it was created from.
+* `timestamps`: 
+  * String of two ISO-8601 timestamps or the terms `start` or `end` separated by commas.
+  * Examples:
+    * `timestamps=2000-01-01T00:00:00,2010-01-01T00:00:00`
+    * `timestamps=start,2010-01-01T00:00:00`
+    * `timestamps=1999-01-01T00:00:00,end`
+* `envelope`:
+  * Geographical envelope provided as a comma-separated series of 4 degrees: lon, lon, lat, lat. 
+  * Examples:
+    * `envelope=90,95,90,100`
+      * Restrict output data to the longitude range [90 deg, 95 deg] and latitude range [90 deg, 100 deg]
+* `thin_factor`:
+  * Take every nth datapoint along specified fields given by `thin_fields` (defaulting to all).
+  * Examples:
+    * `thin_factor=2`
+      * Take every other data point in every field
+    * `thin_factor=3&thin_fields=lat,lon`
+      * Preserving all other fields, take every third data point from the fields `lat` and `lon`
+    * `thin_factor=2&thin_fields=!time,lev`
+      * Preserving all other fields, take every other data point from all fields *except* `time` and `lev`. 
+* `variable_id`:
+  * Which variable to render in the preview. Defaults to `""`. Will attempt to choose the best relevant variable if none is specified.
 
 Output:  
 Returns a job description of the current process, queued to be completed. 
@@ -184,7 +184,7 @@ When completed, checking it with `/status/<job id>` will have an S3 link to the 
 `/fetch/esgf`  
 
 Required Parameters:
-  * `dataset_id`: ID of the dataset provided by search in full format. 
+* `dataset_id`: ID of the dataset provided by search in full format. 
 
 Example:  
 `/fetch/esgf?dataset_id=CMIP6.CMIP.NCAR.CESM2.historical.r11i1p1f1.CFday.ua.gn.v20190514|esgf-data.ucar.edu`  
