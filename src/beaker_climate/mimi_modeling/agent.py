@@ -279,7 +279,7 @@ class MimiModelingAgent(BaseAgent):
         )
         return response["return"]
     
-    @tool(autosummarize=True)
+    @tool()
     async def retrieve_documentation_for_module(self, package_name: str, agent: AgentRef) -> str:
         """
         Gets the specified module documentation
@@ -297,7 +297,7 @@ class MimiModelingAgent(BaseAgent):
         return response["return"]
 
 
-    @tool(autosummarize=True)
+    @tool()
     async def get_function_docstring(self, function_name: str, agent: AgentRef):
         """
         Use this tool to additional information on individual function such as their inputs, outputs and descrption (and generally anything else that would be in a docstring)
