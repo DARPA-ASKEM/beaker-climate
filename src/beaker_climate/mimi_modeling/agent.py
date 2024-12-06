@@ -258,3 +258,79 @@ class MimiModelingAgent(BaseAgent):
             logger.error(err, exc_info=err)
             raise
         return format_execution_context(execution_context)
+
+    @tool(autosummarize=False)
+    async def get_model_info(self, model_var_name: str, agent: AgentRef) -> dict:
+        """
+        Get information about Mimi model parameters and variables and which compartments they belong to.
+
+        You should probably run this before asking the user for more information.
+
+        Args:
+            model_var_name (str): Variable name that contains the Mimi model in the REPL
+
+        Returns:
+            dict: Information about the Mimi Model  
+        """
+        code = agent.context.get_code("model_info", {"model": model_var_name})
+        response = await agent.context.evaluate(
+            code,
+            parent_header={},
+        )
+        return response["return"]
+    
+    @tool()
+    async def retrieve_documentation_for_module(self, package_name: str, agent: AgentRef) -> str:
+        """
+        Gets the specified module documentation
+
+        Args:
+            package_name (str): this is the name of the package to get information about.
+        Returns:
+            str: Markdown of the module docs
+        """
+        code = agent.context.get_code("get_module_docs", {"module": package_name})
+        response = await agent.context.evaluate(
+            code,
+            parent_header={},
+        )
+        return response["return"]
+
+
+    @tool()
+    async def get_function_docstring(self, function_name: str, agent: AgentRef):
+        """
+        Use this tool to additional information on individual function such as their inputs, outputs and descrption (and generally anything else that would be in a docstring)
+        
+        Read the information returned to learn how to use the function and which arguments they take.
+        
+        The function names used in the input to this tool should include the entire module hierarchy
+
+        If this fails, this means the function does not exist.
+        
+        Args:
+            function_name (str): name of the function to lookup. 
+        """
+        code = f"""
+            import DisplayAs, JSON3
+            try {function_name} 
+            catch 
+                DisplayAs.unlimited(
+                    JSON3.write(
+                        Dict("docs" => "{function_name} not defined")
+                    )
+                )
+            else
+                docstring = string(@doc({function_name}))
+                doc_object = Dict("docs" => docstring)
+                DisplayAs.unlimited(
+                    JSON3.write(doc_object)
+                )
+            end
+        """
+        response = await agent.context.beaker_kernel.evaluate(
+            code,
+            parent_header={},
+        )
+        docs = response["return"]["docs"]
+        return docs    
