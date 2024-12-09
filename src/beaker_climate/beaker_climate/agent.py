@@ -75,29 +75,11 @@ class ClimateDataUtilityAgent(BeakerAgent):
             dict: ESGF unmodified JSON output to be saved to a variable in the notebook.
         """
         try: 
-            json = await self.esgf.tool_search(query)
-            return json
+            return await self.esgf.tool_search(query)
         except Exception as e:
             self.add_context(f"The tool failed with this error: {str(e)}. I need to inform the user about this immediately before deciding what to do next. I need to tell the user the exact error with zero summarization.") 
             return {}
 
-    # @tool()
-    # async def show_search_metadata(self, results: str) -> str:
-    #     '''
-    #     You will show the search metadata for the datasets and make a markdown-formatted representation of the metadata.
-
-    #     Refer to the climate-search API documentation you understand if there are questions.
-
-    #     List only the first few datasets returned. 
-    #     Listing metadata attributes about datasets to the user is very useful. 
-    #     When asked to describe the dataset, mention coordinates, frequency, and resolution as important details.
-
-    #     Args:
-    #         results (str): JSON returned from the search endpoint.
-    #     Returns:
-    #         str: markdown formatted representation of the metadata in human readable units
-    #     '''
-    #     return results
 
     @tool()
     async def fetch(self, dataset_id: str, agent: AgentRef, loop: LoopControllerRef, react_context: ReactContextRef) -> dict:
