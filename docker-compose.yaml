@@ -20,7 +20,6 @@ services:
     env_file:
       - .env      
     volumes:
-      - ./climate-python:/jupyter/climate-python
-      - ./mimi-api:/jupyter/mimi-api
+      - ./src/beaker_climate:/jupyter/beaker_climate
     working_dir: /jupyter
     command: ["beaker", "dev", "watch", "--ip", "0.0.0.0"]
