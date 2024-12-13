@@ -20,6 +20,7 @@ services:
     env_file:
       - .env      
     volumes:
-      - ./src/beaker_climate:/jupyter/beaker_climate
+      - ./:/jupyter/beaker_climate
+      - ./.config:/home/jupyter/.config
     working_dir: /jupyter
     command: ["beaker", "dev", "watch", "--ip", "0.0.0.0"]
