@@ -40,7 +40,6 @@ class MimiModelingAgent(BaseAgent):
 
         api_config = load(f'{root_folder}/api_agent.yaml')
         drafter_config = api_config["drafter_config"]
-        finalizer_config = api_config["finalizer_config"]
         specs = api_config["api_specs"]
 
         super().__init__(context, tools, **kwargs)
@@ -48,7 +47,7 @@ class MimiModelingAgent(BaseAgent):
         self.logger = MessageLogger(self.context)
 
         try:
-            self.api = AdhocApi(logger=self.logger, drafter_config=drafter_config, finalizer_config=finalizer_config, apis=specs)
+            self.api = AdhocApi(logger=self.logger, drafter_config=drafter_config, apis=specs)
         except ValueError as e:
             self.add_context(f"The APIs failed to load for this reason: {str(e)}. Please inform the user immediately.")
             self.api = None
@@ -84,7 +83,11 @@ class MimiModelingAgent(BaseAgent):
         Returns:
             str: The response to the query
         """
-        return self.api.ask_api(api, query)
+        try: 
+            response = self.api.ask_api(api, query)
+            return response
+        except Exception as e:
+            return f"Error happened in upstream provider, make sure to inform the user. Say this directly in your thoughts: {str(e)}" 
 
     @tool()
     async def use_api(self, api: str, goal: str, agent: AgentRef, loop: LoopControllerRef, react_context: ReactContextRef) -> str:
@@ -108,8 +111,8 @@ class MimiModelingAgent(BaseAgent):
             if self.api is None:
                 return "Do not attempt to fix this result: there is no API key for the agent that creates the request. Inform the user that they need to specify GEMINI_API_KEY and consider this a successful tool invocation."
             self.logger.error(str(e))
+            return f"Error happened in upstream API provider, make sure to inform the user: {str(e)}"
 
-        self.logger.info(f"running code from rc2 {code}")
         try:
             result = await self.run_code(code, agent=agent, react_context=react_context)
             return result

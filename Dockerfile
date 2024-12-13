@@ -28,12 +28,12 @@ RUN julia -e ' \
 USER root
 
 # Copy project files
-COPY --chown=1000:1000 . /jupyter/
-RUN chown -R 1000:1000 /jupyter
+COPY --chown=1000:1000 . /jupyter/beaker_climate
+RUN chown -R 1000:1000 /jupyter/beaker_climate
 
 # Install Python requirements
 RUN pip install --upgrade --no-cache-dir hatch pip
-RUN pip install -e /jupyter/
+RUN pip install -v -e /jupyter/beaker_climate
 
 # Switch to jupyter user and install Julia packages
 USER jupyter
