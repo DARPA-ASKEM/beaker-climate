@@ -22,5 +22,6 @@ services:
     volumes:
       - ./:/jupyter/beaker_climate
       - ./.config:/home/jupyter/.config
+      - ./.beaker.conf:/jupyter/.beaker.conf      
     working_dir: /jupyter
     command: ["beaker", "dev", "watch", "--ip", "0.0.0.0"]
