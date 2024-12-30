@@ -1,56 +1,51 @@
-# beaker-climate - an extension for [Beaker notebooks](https://github.com/jataware/beaker-kernel)
+# beaker-climate
 
 [![PyPI - Version](https://img.shields.io/pypi/v/beaker-climate.svg)](https://pypi.org/project/beaker-climate)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/beaker-climate.svg)](https://pypi.org/project/beaker-climate)
+
 -----
 
 ## Table of Contents
 
-- [About Beaker](#about-beaker)
 - [Installation](#installation)
-
-
-## About Beaker
-
-Beaker provides Contextually-aware notebooks with built-in AI assistant. It is built atop Jupyter, leveraging the deep Jupyter ecosystem.
-
-It consists of multiple aspects, including:
-- A server for hosting/running Beaker/Jupyter sessions.
-- The Beaker kernel, an advanced Jupyter Kernel.
-- Beaker-TS, a TypeScript/JavaScript library.
-- A Vue based, reactive, extensible UI interface.
-- Beaker-Vue, a Vue3 component library for building your own UIs with minimal hassle.
-
-Beaker can be extended with new [contexts](https://jataware.github.io/beaker-kernel/contexts.html) and [subkernels](https://jataware.github.io/beaker-kernel/subkernels.html)
-
-Learn more in the [Beaker documentation](https://jataware.github.io/beaker-kernel/).
+- [License](#license)
 
 ## Installation
 
-To add any contained contexts or subkernels to Beaker, you simply need to install this package. The provided elements will be available in Beaker upon next start.
-
-### PyPI install (if deployed)
 ```console
-pip install beaker-climate
-```
+# Install Julia
+curl -fsSL https://install.julialang.org | sh -s -- -y
+export PATH="/root/.julialup/bin:${PATH}"
 
-### beaker CLI (installs project in dev mode)
-```console
-beaker project update beaker-climate
-```
+# Set up Julia environment
+julia -e 'using Pkg; Pkg.add("Mimi"); Pkg.add("JSON3"); Pkg.add("DisplayAs"); using Mimi'
 
-### local pip dev mode install
-```console
-cd beaker-climate
+# Install Mimi Julia library
+julia -e 'using Pkg; Pkg.add("Mimi")'
+
+# install beaker-climate contexts
 pip install -e .
+
+export OPENAI_API_KEY=your key here
+export GEMINI_API_KEY=your key here
+export ANTHROPIC_API_KEY=your key here
 ```
 
-### local pip install
+Run with `beaker notebook`
+
+## Usage Notes
+
+There are two contexts: `beaker_climate` and `mimi-modeling`. `beaker_climate` is used for general climate science questions in Python and `mimi-modeling` is used for questions about the Mimi integrated assessment models in Julia. The `mimi-modeling` context has only been extensively tested using Anthropic's Claude 3.5 Sonnet model as the primary model. Though it should work with other models, it may not perform as well.
+
+### Docker Usage
+
+To run the docker container, first copy `.beaker.conf.example` to `.beaker.conf` and set the LLM keys both there and in the `.env` file. Then use the following command:
+
 ```console
-cd beaker-climate
-pip install .
+docker compose build
+docker compose up
 ```
 
-### Note
-Some changes, such as adding or moving a context require updating/reinstalling the project.
-You should run `beaker project update` if you encounter issues after making updates to the project.
+## License
+
+`beaker-climate` is distributed under the terms of the [MIT](https://spdx.org/licenses/MIT.html) license.

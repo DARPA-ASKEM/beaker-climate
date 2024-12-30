@@ -21,6 +21,8 @@ wheels/
 *.egg
 MANIFEST
 
+.config
+
 # Virtual Environment
 venv/
 env/
@@ -63,3 +65,6 @@ coverage.xml
 
 # Logs
 *.log
+
+# Beaker
+.beaker.conf
