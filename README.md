@@ -23,6 +23,9 @@ julia -e 'using Pkg; Pkg.add("Mimi"); Pkg.add("JSON3"); Pkg.add("DisplayAs"); us
 # Install Mimi Julia library
 julia -e 'using Pkg; Pkg.add("Mimi")'
 
+# Install Mimi FUND
+julia -e 'using Pkg; Pkg.add(url="https://github.com/fund-model/MimiFUND.jl.git"); using MimiFUND'
+
 # install beaker-climate contexts
 pip install -e .
 
