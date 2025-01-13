@@ -24,4 +24,4 @@ services:
       - ./.config:/home/jupyter/.config
       - ./.beaker.conf:/jupyter/.beaker.conf      
     working_dir: /jupyter
-    command: ["beaker", "dev", "watch", "--ip", "0.0.0.0"]
+    command: "sh -c 'beaker dev watch --ip 0.0.0.0 '"
