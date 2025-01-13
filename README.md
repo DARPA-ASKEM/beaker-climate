@@ -18,10 +18,10 @@ curl -fsSL https://install.julialang.org | sh -s -- -y
 export PATH="/root/.julialup/bin:${PATH}"
 
 # Set up Julia environment
-julia -e 'using Pkg; Pkg.add("Mimi"); Pkg.add("JSON3"); Pkg.add("DisplayAs"); using Mimi'
+julia -e 'using Pkg; packages = ["IJulia", "DataSets", "XLSX", "Plots", "Downloads", "DataFrames", "ImageShow", "FileIO", "JSON3", "CSV" ]; Pkg.add(packages);'
 
 # Install Mimi Julia library
-julia -e 'using Pkg; Pkg.add("Mimi")'
+julia -e 'using Pkg; Pkg.add("Mimi"); using Mimi'
 
 # Install Mimi FUND
 julia -e 'using Pkg; Pkg.add(url="https://github.com/fund-model/MimiFUND.jl.git"); using MimiFUND'
