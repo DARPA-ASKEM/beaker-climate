@@ -15,23 +15,14 @@ description: |
 
     {model}
 
-documentation: 
-    file: readme.md
-model:
-    file: science.md
-mimi: 
-    file: mimi.md
-modification:
-    file: mimi_modification.md
-existing_model:
-    file: mimi_existing_model.md
-components: 
-    file: components.md
-parameters:
-    file: parameters.md
-cache_body: 
-    default: true 
-instructions: |
+documentation: !load documentation/readme.md
+model: !load documentation/science.md
+mimi: !load documentation/mimi.md
+modification: !load documentation/mimi_modification.md
+existing_model: !load documentation/mimi_existing_model.md
+components: !load documentation/components.md
+parameters: !load documentation/parameters.md
+documentation: |
     This is a Julia library. You will be reading the documentation and writing Julia code to interface with the library.
 
     If you are running an existing model, refer to the documentation below, provided in backticks.
