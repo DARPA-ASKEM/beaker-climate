@@ -25,11 +25,11 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "beaker_kernel~=1.8.6",
+  "beaker_kernel~=1.8.11",
   "requests",
   "google-generativeai",
   "PyYAML",
-  "adhoc-api==1.0.0rc3",
+  "adhoc-api==1.0.0",
   "biopython",
   "boto3",
   "google-cloud-storage",
