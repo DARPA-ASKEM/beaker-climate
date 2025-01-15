@@ -20,9 +20,8 @@ from google.generativeai import caching
 import pathlib
 
 from adhoc_api.tool import AdhocApi
-from .yaml_loader import load, MessageLogger
+from adhoc_api.loader import load_yaml_api
 
-logger = logging.getLogger(__name__)
 
 class MimiModelingAgent(BaseAgent):
     """
@@ -37,29 +36,32 @@ class MimiModelingAgent(BaseAgent):
     def __init__(self, context: BaseContext = None, tools: list | None = None, **kwargs):
         genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
         root_folder = pathlib.Path(__file__).resolve().parent
+        api_def_dir = os.path.join(root_folder, 'api_definitions/mimifund')
 
-        api_config = load(f'{root_folder}/api_agent.yaml')
-        drafter_config = api_config["drafter_config"]
-        specs = api_config["api_specs"]
+        api_spec = load_yaml_api(pathlib.Path(os.path.join(api_def_dir, 'api.yaml')))
+        drafter_config = {'provider': 'anthropic', 'model': 'claude-3-5-sonnet-latest', 'api_key': os.environ.get("ANTHROPIC_API_KEY")}
 
         super().__init__(context, tools, **kwargs)
         sleep(5)
-        self.logger = MessageLogger(self.context)
+
+        logging.basicConfig(level=os.environ.get('LOGLEVEL', 'INFO'))
+        self.logger = logging.getLogger(__name__)
 
         try:
-            self.api = AdhocApi(logger=self.logger, drafter_config=drafter_config, apis=specs)
+            self.api = AdhocApi(logger=self.logger, drafter_config=drafter_config, apis=[api_spec])
         except ValueError as e:
             self.add_context(f"The APIs failed to load for this reason: {str(e)}. Please inform the user immediately.")
             self.api = None
 
-        api_descriptions = '\n'.join([f'''{spec["name"]}: {spec["description"]}''' for spec in specs])
+        additional_context = f"""\
+            You have access to a special integration with a specific API: {api_spec["name"]}. 
+            Here is a description of this API: {api_spec["description"]}.
+            
+            If you are asked for information about this API, you should use the `ask_api` tool to get more information about the API.
+            If you are asked to use this API, you should use the `use_api` tool generate code for you to run for the API.
+            """
 
-        self.add_context(f"""\
-            The APIs available to you are:
-                {[spec['name'] for spec in specs]}.
-            For details about each one, here are descriptions for what is relevant to the given API.
-                {api_descriptions}
-        """)
+        self.add_context(additional_context)
 
     @tool
     def list_apis(self) -> dict:
