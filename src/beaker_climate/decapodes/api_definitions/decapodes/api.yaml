@@ -1,0 +1,77 @@
+name: decapodes
+cache_key: api_assistant_decapodes
+description: |
+    Decapodes.jl is a framework for developing, composing, and simulating physical systems.
+
+    Decapodes.jl is the synthesis of Applied Category Theory (ACT) techniques for formalizing and composing physics equations, and Discrete Exterior Calculus (DEC) techniques for formalizing differential operators. CombinatorialSpaces.jl hosts tools for discretizing space and defining DEC operators on simplicial complexes, and DiagrammaticEquations.jl hosts tooling for representing the equations as formal ACT diagrams. This repository combines these two packages, compiling diagrams down to simulatable code.
+
+
+
+documentation: !load documentation/index.md
+canon: !load documentation/canon.md
+api: !load documentation/api.md
+overview: !load documentation/overview.md
+equations: !load documentation/equations.md
+ice_dynamics: !load documentation/ice_dynamics.md
+halmo: !load documentation/halmo.md
+poiseuille: !load documentation/poiseuille.md
+cism: !load documentation/cism.md
+
+diagrammatic_equations: |
+    Testing
+    {!load documentation/diagrammatic_equations/index.md}
+
+    {!load documentation/diagrammatic_equations/api.md}
+
+
+documentation: |
+    This is a Julia library. You will be reading the documentation and writing Julia code to interface with the library.
+
+    # Documentation
+
+    ## Canonical representations of commonly used models and equations
+    ```
+    {canon}
+    ```
+
+    ## API definition
+    ```
+    {api}
+    ```
+
+    ## Overview
+    ```
+    {overview}
+    ```
+
+    # Tutorials
+
+    ## Simple Equations
+    ```
+    {equations}
+    ```
+
+    ## Ice dynamics
+    ```
+    {ice_dynamics}
+    ```
+
+    ## Halmo
+    ```
+    {halmo}
+    ```
+
+    ## Poiseuille
+    ```
+    {poiseuille}
+    ```
+
+    ## Community Ice Sheet Model
+    ```
+    {cism}
+    ```
+
+    # Other packages:
+
+    ## diagrammatic_equations
+    {diagrammatic_equations}

@@ -1,30 +1,26 @@
-import json
-import logging
-import re
-import requests
-from time import sleep
-import asyncio
-import os
+from typing import TYPE_CHECKING
 
 from archytas.tool_utils import AgentRef, LoopControllerRef, ReactContextRef, tool
-from typing import Any
-
-from beaker_kernel.lib.agent import BaseAgent
-from beaker_kernel.lib.context import BaseContext
-from beaker_kernel.lib.utils import ExecutionTask
-from beaker_kernel.lib.subkernels.base import CheckpointableBeakerSubkernel
-from beaker_kernel.lib.config import config
-
-import google.generativeai as genai
-from google.generativeai import caching
-
-import pathlib
-
+from beaker_kernel.lib import BeakerAgent
 from adhoc_api.tool import AdhocApi
 from adhoc_api.loader import load_yaml_api
 
+import google.generativeai as genai
+import logging
+import os
+import pathlib
+import time
+import re
+from beaker_kernel.lib.subkernels.base import CheckpointableBeakerSubkernel
+from beaker_kernel.lib.config import config
 
-class MimiModelingAgent(BaseAgent):
+if TYPE_CHECKING:
+    from beaker_kernel.kernel import BeakerKernel
+    from beaker_kernel.lib.utils import ExecutionTask
+    from beaker_kernel.lib.context import BeakerContext
+
+
+class DecapodesAgent(BeakerAgent):
     """
     You are a chat assistant that helps the user with their questions. You are running inside of Beaker which is a chat application
     sitting on top of a Jupyter notebook. You will be working with Julia and not the other languages. Prefer running code to only generating it.
@@ -33,34 +29,49 @@ class MimiModelingAgent(BaseAgent):
 
     If a request is relevant to an API you have access to, DO NOT run a placeholder simulation and instead ensure that you use the API.
     """
+    # The class docstring is provided to the LLM to set the expectations for the agent and how it should
 
-    def __init__(self, context: BaseContext = None, tools: list | None = None, **kwargs):
+    def __init__(self, context: "BeakerContext" = None, tools: list | None = None, **kwargs):
         genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
         root_folder = pathlib.Path(__file__).resolve().parent
-        api_def_dir = os.path.join(root_folder, 'api_definitions/mimifund')
 
-        api_spec = load_yaml_api(pathlib.Path(os.path.join(api_def_dir, 'api.yaml')))
+        apis = [
+            load_yaml_api(pathlib.Path(os.path.join(root_folder, 'api_definitions', api, 'api.yaml')))
+            for api in ("decapodes", )
+        ]
+
         drafter_config = {'provider': 'anthropic', 'model': 'claude-3-5-sonnet-latest', 'api_key': os.environ.get("ANTHROPIC_API_KEY")}
 
         super().__init__(context, tools, **kwargs)
-        sleep(5)
+        time.sleep(5)
 
         logging.basicConfig(level=os.environ.get('LOGLEVEL', 'INFO'))
         self.logger = logging.getLogger(__name__)
 
         try:
-            self.api = AdhocApi(logger=self.logger, drafter_config=drafter_config, apis=[api_spec])
+            self.api = AdhocApi(logger=self.logger, drafter_config=drafter_config, apis=apis)
         except ValueError as e:
             self.add_context(f"The APIs failed to load for this reason: {str(e)}. Please inform the user immediately.")
             self.api = None
 
-        additional_context = f"""\
-            You have access to a special integration with a specific API: {api_spec["name"]}.
-            Here is a description of this API: {api_spec["description"]}.
+        name_str = ', '.join(api['name'] for api in apis)
+        description_str = '\n\n'.join(f"""\
+## {api["name"]}
 
-            If you are asked for information about this API, you should use the `ask_api` tool to get more information about the API.
-            If you are asked to use this API, you should use the `use_api` tool generate code for you to run for the API.
-            """
+```
+{api["description"]}
+```"""
+            for api in apis)
+
+        additional_context = f"""\
+You have access to a special integration with specific API(s): {name_str}.
+Here are the description for these API(s):
+{description_str}
+
+If you are asked for information about this API, you should use the `ask_api` tool to get more information about the API.
+If you are asked to use this API, you should use the `use_api` tool generate code for you to run for the API.
+"""
+        self.logger.warning(apis)
 
         self.add_context(additional_context)
 
