@@ -7,7 +7,7 @@ description: |
 
 
 
-documentation: !load documentation/index.md
+intro: !load documentation/index.md
 canon: !load documentation/canon.md
 api: !load documentation/api.md
 overview: !load documentation/overview.md
@@ -17,21 +17,15 @@ halmo: !load documentation/halmo.md
 poiseuille: !load documentation/poiseuille.md
 cism: !load documentation/cism.md
 
-diagrammatic_equations: |
-    Testing
-    {!load documentation/diagrammatic_equations/index.md}
-
-    {!load documentation/diagrammatic_equations/api.md}
-
-
-documentation: |
-    This is a Julia library. You will be reading the documentation and writing Julia code to interface with the library.
-
-    # Documentation
-
-    ## Canonical representations of commonly used models and equations
+decapodes_docs: |
+    ## Intro
     ```
-    {canon}
+    {intro}
+    ```
+
+    ## Overview
+    ```
+    {overview}
     ```
 
     ## API definition
@@ -39,9 +33,9 @@ documentation: |
     {api}
     ```
 
-    ## Overview
+    ## Canonical representations of commonly used models and equations
     ```
-    {overview}
+    {canon}
     ```
 
     # Tutorials
@@ -71,7 +65,62 @@ documentation: |
     {cism}
     ```
 
-    # Other packages:
 
-    ## diagrammatic_equations
+deq_docs: |
+    ## Intro
+    ```
+    {!load documentation/deq/index.md}
+    ```
+
+    ## API Definition
+    ```
+    {!load documentation/deq/api.md}
+    ```
+
+
+catlab_docs: |
+    ## Intro
+    ```
+    {!load documentation/catlab/index.md}
+    ```
+
+    ## ADTs
+    ```
+    {!load documentation/catlab/adts.md}
+    ```
+
+    ## Categorical Algebra
+    ```
+    {!load documentation/catlab/categorical_algebra.md}
+    ```
+
+
+acset_docs: |
+    ## Intro
+    ```
+    {!load documentation/acsets/index.md}
+    ```
+
+    ## API Definition
+    ```
+    {!load documentation/acsets/api.md}
+    ```
+
+
+documentation: |
+    This provides information and documentation on several Julia libraries. You will be reading the documentation and writing Julia code to interface with the libraries.
+
+    # Decapodes.jl
+    {decapodes_docs}
+
+
+    # DiagrammaticEquations.jl
     {diagrammatic_equations}
+
+
+    # Catlab.jl
+    {catlab_docs}
+
+
+    # ACsets.js
+    {acsets_docs}
