@@ -3,7 +3,7 @@ RUN useradd -m jupyter
 EXPOSE 8888
 
 RUN apt update && apt-get install -y lsof build-essential make gcc g++ git gfortran npm \
-        gdal-bin libgdal-dev python3-all-dev libspatialindex-dev
+        gdal-bin libgdal-dev python3-all-dev libspatialindex-dev graphviz libgraphviz-dev texlive
 ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
 ENV C_INCLUDE_PATH=/usr/include/gdal
 
@@ -19,7 +19,16 @@ RUN julia -e 'using Pkg; Pkg.add("IJulia");'
 # Install Julia requirements
 RUN julia -e ' \
     packages = [ \
-        "DataSets", "XLSX", "Plots", "Downloads", "DataFrames", "ImageShow", "FileIO", "Mimi", "JSON3", "DisplayAs"  \
+        "JLLWrappers", "DataSets", "XLSX", "Plots", "Downloads", "DataFrames", "ImageShow", "FileIO", "JSON3", "DisplayAs"  \
+    ]; \
+    using Pkg; \
+    Pkg.add(packages);'
+
+# Install beaker-decapodes requirements in julia environment
+RUN julia -e ' \
+    packages = [ \
+        "Decapodes", "GraphViz", "Catlab", "DiagrammaticEquations", "CombinatorialSpaces", "CoordRefSystems", "GeometryBasics", \
+        "SparseArrays", "LinearAlgebra", "CairoMakie", "ComponentArrays", "Interpolations", "OrdinaryDiffEq", "MLStyle" \
     ]; \
     using Pkg; \
     Pkg.add(packages);'
@@ -27,24 +36,28 @@ RUN julia -e ' \
 # Back to root for Python package install
 USER root
 
+RUN pip install --upgrade --no-cache-dir hatch pip tomli
+# Install project requirements
+# Hack to install requirements without requiring the rest of the files
+COPY --chown=1000:1000 pyproject.toml /jupyter/beaker_climate/pyproject.toml
+RUN bash -c "pip install --no-build-isolation --no-cache-dir -r <(echo 'import tomli; c = tomli.load(open(\"/jupyter/beaker_climate/pyproject.toml\", \"rb\")); d = c[\"project\"][\"dependencies\"]; print(\"\n\".join(f\"{dep}\" for dep in d))' | python)"
+
 # Copy project files
 COPY --chown=1000:1000 . /jupyter/beaker_climate
 RUN chown -R 1000:1000 /jupyter/beaker_climate
 
 # Install Python requirements
-RUN pip install --upgrade --no-cache-dir hatch pip
-RUN pip install -v -e /jupyter/beaker_climate
+# RUN pip install --no-cache-dir -v -e /jupyter/beaker_climate
+RUN pip install --upgrade --no-cache-dir hatch pip tomli editables
+RUN pip install --no-build-isolation --no-cache-dir -v -e /jupyter/beaker_climate
 
 # Switch to jupyter user and install Julia packages
 USER jupyter
 WORKDIR /jupyter
 
-RUN julia -e 'using Pkg; Pkg.add("IJulia");'
-
-# Install required Julia packages (these are used in the procedures/*.jl files)
-RUN julia -e 'using Pkg; Pkg.add(["Mimi", "JSON3", "DisplayAs"]); using Mimi'
-
-# Install LLMConvenience from GitHub
+# Install required Julia packages for Mimi (these are used in the procedures/*.jl files)
+RUN julia -e 'using Pkg; Pkg.add(["Mimi"]); using Mimi'
+# Install MimiFund from GitHub
 RUN julia -e 'using Pkg; Pkg.add(url="https://github.com/fund-model/MimiFUND.jl.git"); using MimiFUND'
 
 # Service

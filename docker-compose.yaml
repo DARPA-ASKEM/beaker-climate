@@ -17,6 +17,11 @@ services:
       - TOOL_ENABLED_RUN_CODE=true
       - ENABLE_CHECKPOINTS=true
       - OPENAI_API_KEY
+      - GEMINI_API_KEY
+      - ANTHROPIC_API_KEY
+      - LLM_PROVIDER_IMPORT_PATH=archytas.models.anthropic.AnthropicModel
+      - LLM_SERVICE_MODEL=claude-3-5-sonnet-latest
+      - LLM_SERVICE_TOKEN=${ANTHROPIC_API_KEY}
     env_file:
       - .env      
     volumes:

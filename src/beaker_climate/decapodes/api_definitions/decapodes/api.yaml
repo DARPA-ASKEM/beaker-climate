@@ -1,0 +1,118 @@
+name: Decapodes
+cache_key: api_assistant_decapodes
+description: |
+    Decapodes.jl is a framework for developing, composing, and simulating physical systems.
+
+    Decapodes.jl is the synthesis of Applied Category Theory (ACT) techniques for formalizing and composing physics equations, and Discrete Exterior Calculus (DEC) techniques for formalizing differential operators. CombinatorialSpaces.jl hosts tools for discretizing space and defining DEC operators on simplicial complexes, and DiagrammaticEquations.jl hosts tooling for representing the equations as formal ACT diagrams. This repository combines these two packages, compiling diagrams down to simulatable code.
+
+intro: !load documentation/index.md
+canon: !load documentation/canon.md
+api: !load documentation/api.md
+overview: !load documentation/overview.md
+equations: !load documentation/equations.md
+ice_dynamics: !load documentation/ice_dynamics.md
+halmo: !load documentation/halmo.md
+poiseuille: !load documentation/poiseuille.md
+cism: !load documentation/cism.md
+
+deq_intro: !load documentation/deq/index.md
+deq_api: !load documentation/deq/api.md
+
+catlab_intro: !load documentation/catlab/index.md
+catlab_adts: !load documentation/catlab/adts.md
+catlab_cat_alg: !load documentation/catlab/categorical_algebra.md
+
+acsets_intro: !load documentation/acsets/index.md
+acsets_api: !load documentation/acsets/api.md
+
+documentation: |
+    This provides information and documentation on several Julia libraries. You will be reading the documentation and writing Julia code to interface with the libraries.
+
+    # Decapodes.jl
+    ## Intro
+    ```
+    {intro}
+    ```
+
+    ## Overview
+    ```
+    {overview}
+    ```
+
+    ## API definition
+    ```
+    {api}
+    ```
+
+    ## Canonical representations of commonly used models and equations
+    ```
+    {canon}
+    ```
+
+    # Tutorials
+
+    ## Simple Equations
+    ```
+    {equations}
+    ```
+
+    ## Ice dynamics
+    ```
+    {ice_dynamics}
+    ```
+
+    ## Halmo
+    ```
+    {halmo}
+    ```
+
+    ## Poiseuille
+    ```
+    {poiseuille}
+    ```
+
+    ## Community Ice Sheet Model
+    ```
+    {cism}
+    ```
+
+
+    # DiagrammaticEquations.jl
+    ## Intro
+    ```
+    {deq_intro}
+    ```
+
+    ## API Definition
+    ```
+    {deq_api}
+    ```
+
+
+    # Catlab.jl
+    ## Intro
+    ```
+    {catlab_intro}
+    ```
+
+    ## ADTs
+    ```
+    {catlab_adts}
+    ```
+
+    ## Categorical Algebra
+    ```
+    {catlab_cat_alg}
+    ```
+
+
+    # ACsets.js
+    ## Intro
+    ```
+    {acsets_intro}
+    ```
+
+    ## API Definition
+    ```
+    {acsets_api}
+    ```
