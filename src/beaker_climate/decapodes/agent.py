@@ -43,7 +43,6 @@ class DecapodesAgent(BeakerAgent):
         drafter_config = {'provider': 'anthropic', 'model': 'claude-3-5-sonnet-latest', 'api_key': os.environ.get("ANTHROPIC_API_KEY")}
 
         super().__init__(context, tools, **kwargs)
-        time.sleep(5)
 
         logging.basicConfig(level=os.environ.get('LOGLEVEL', 'INFO'))
         self.logger = logging.getLogger(__name__)
@@ -71,8 +70,6 @@ Here are the description for these API(s):
 If you are asked for information about this API, you should use the `ask_api` tool to get more information about the API.
 If you are asked to use this API, you should use the `use_api` tool generate code for you to run for the API.
 """
-        self.logger.warning(apis)
-
         self.add_context(additional_context)
 
     @tool

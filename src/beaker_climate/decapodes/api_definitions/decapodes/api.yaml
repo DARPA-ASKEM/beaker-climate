@@ -1,11 +1,9 @@
-name: decapodes
+name: Decapodes
 cache_key: api_assistant_decapodes
 description: |
     Decapodes.jl is a framework for developing, composing, and simulating physical systems.
 
     Decapodes.jl is the synthesis of Applied Category Theory (ACT) techniques for formalizing and composing physics equations, and Discrete Exterior Calculus (DEC) techniques for formalizing differential operators. CombinatorialSpaces.jl hosts tools for discretizing space and defining DEC operators on simplicial complexes, and DiagrammaticEquations.jl hosts tooling for representing the equations as formal ACT diagrams. This repository combines these two packages, compiling diagrams down to simulatable code.
-
-
 
 intro: !load documentation/index.md
 canon: !load documentation/canon.md
@@ -17,7 +15,20 @@ halmo: !load documentation/halmo.md
 poiseuille: !load documentation/poiseuille.md
 cism: !load documentation/cism.md
 
-decapodes_docs: |
+deq_intro: !load documentation/deq/index.md
+deq_api: !load documentation/deq/api.md
+
+catlab_intro: !load documentation/catlab/index.md
+catlab_adts: !load documentation/catlab/adts.md
+catlab_cat_alg: !load documentation/catlab/categorical_algebra.md
+
+acsets_intro: !load documentation/acsets/index.md
+acsets_api: !load documentation/acsets/api.md
+
+documentation: |
+    This provides information and documentation on several Julia libraries. You will be reading the documentation and writing Julia code to interface with the libraries.
+
+    # Decapodes.jl
     ## Intro
     ```
     {intro}
@@ -66,61 +77,42 @@ decapodes_docs: |
     ```
 
 
-deq_docs: |
+    # DiagrammaticEquations.jl
     ## Intro
     ```
-    {!load documentation/deq/index.md}
+    {deq_intro}
     ```
 
     ## API Definition
     ```
-    {!load documentation/deq/api.md}
+    {deq_api}
     ```
 
 
-catlab_docs: |
+    # Catlab.jl
     ## Intro
     ```
-    {!load documentation/catlab/index.md}
+    {catlab_intro}
     ```
 
     ## ADTs
     ```
-    {!load documentation/catlab/adts.md}
+    {catlab_adts}
     ```
 
     ## Categorical Algebra
     ```
-    {!load documentation/catlab/categorical_algebra.md}
+    {catlab_cat_alg}
     ```
 
 
-acset_docs: |
+    # ACsets.js
     ## Intro
     ```
-    {!load documentation/acsets/index.md}
+    {acsets_intro}
     ```
 
     ## API Definition
     ```
-    {!load documentation/acsets/api.md}
+    {acsets_api}
     ```
-
-
-documentation: |
-    This provides information and documentation on several Julia libraries. You will be reading the documentation and writing Julia code to interface with the libraries.
-
-    # Decapodes.jl
-    {decapodes_docs}
-
-
-    # DiagrammaticEquations.jl
-    {diagrammatic_equations}
-
-
-    # Catlab.jl
-    {catlab_docs}
-
-
-    # ACsets.js
-    {acsets_docs}
