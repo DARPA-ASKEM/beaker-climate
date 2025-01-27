@@ -36,10 +36,10 @@ class MimiModelingAgent(BaseAgent):
 
     def __init__(self, context: BaseContext = None, tools: list | None = None, **kwargs):
         genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
-        root_folder = pathlib.Path(__file__).resolve().parent
-        api_def_dir = os.path.join(root_folder, 'api_definitions/mimifund')
+        self.root_folder = pathlib.Path(__file__).resolve().parent
+        self.api_def_dir = os.path.join(self.root_folder, 'api_definitions/mimifund')
 
-        api_spec = load_yaml_api(pathlib.Path(os.path.join(api_def_dir, 'api.yaml')))
+        api_spec = load_yaml_api(pathlib.Path(os.path.join(self.api_def_dir, 'api.yaml')))
         drafter_config = {'provider': 'anthropic', 'model': 'claude-3-5-sonnet-latest', 'api_key': os.environ.get("ANTHROPIC_API_KEY")}
 
         super().__init__(context, tools, **kwargs)
@@ -265,78 +265,47 @@ class MimiModelingAgent(BaseAgent):
             raise
         return format_execution_context(execution_context)
 
-    @tool(autosummarize=False)
-    async def get_model_info(self, model_var_name: str, agent: AgentRef) -> dict:
+    @tool(autosummarize=True)
+    async def add_example(self, code: str, description: str) -> str:
         """
-        Get information about Mimi model parameters and variables and which compartments they belong to.
-
-        You should probably run this before asking the user for more information.
+        Add a successful code example to the API's examples.md documentation file.
+        This tool should be used after successfully completing a task with an API to capture the working code for future reference.
 
         Args:
-            model_var_name (str): Variable name that contains the Mimi model in the REPL
+            code (str): The working, successful code to add as an example
+            description (str): A brief description of what the example demonstrates
 
         Returns:
-            dict: Information about the Mimi Model
+            str: Message indicating success or failure of adding the example
         """
-        code = agent.context.get_code("model_info", {"model": model_var_name})
-        response = await agent.context.evaluate(
-            code,
-            parent_header={},
-        )
-        return response["return"]
+        try:
+            api_folder = 'mimifund'
+            # Construct path to examples.md file
+            examples_path = os.path.join(self.root_folder, "api_definitions", api_folder, "documentation", "examples.md")
+            os.makedirs(os.path.dirname(examples_path), exist_ok=True)
 
-    @tool()
-    async def retrieve_documentation_for_module(self, package_name: str, agent: AgentRef) -> str:
-        """
-        Gets the specified module documentation
+            # Create or append to examples.md
+            mode = 'a' if os.path.exists(examples_path) else 'w'
+            with open(examples_path, mode) as f:
+                if mode == 'w':
+                    f.write("# Examples\n\n")
+                
+                # Get next example number
+                example_num = 1
+                if mode == 'a':
+                    with open(examples_path, 'r') as read_f:
+                        for line in read_f:
+                            if line.startswith('## Example'):
+                                example_num += 1
 
-        Args:
-            package_name (str): this is the name of the package to get information about.
-        Returns:
-            str: Markdown of the module docs
-        """
-        code = agent.context.get_code("get_module_docs", {"module": package_name})
-        response = await agent.context.evaluate(
-            code,
-            parent_header={},
-        )
-        return response["return"]
+                # Add the new example
+                f.write(f"\n\n## Example {example_num}: {description}\n\n")
+                f.write("```\n")
+                f.write(code)
+                f.write("\n```\n")
 
+            return f"Successfully added example {example_num} to {examples_path}"
 
-    @tool()
-    async def get_function_docstring(self, function_name: str, agent: AgentRef):
-        """
-        Use this tool to additional information on individual function such as their inputs, outputs and descrption (and generally anything else that would be in a docstring)
-
-        Read the information returned to learn how to use the function and which arguments they take.
-
-        The function names used in the input to this tool should include the entire module hierarchy
-
-        If this fails, this means the function does not exist.
-
-        Args:
-            function_name (str): name of the function to lookup.
-        """
-        code = f"""
-            import DisplayAs, JSON3
-            try {function_name}
-            catch
-                DisplayAs.unlimited(
-                    JSON3.write(
-                        Dict("docs" => "{function_name} not defined")
-                    )
-                )
-            else
-                docstring = string(@doc({function_name}))
-                doc_object = Dict("docs" => docstring)
-                DisplayAs.unlimited(
-                    JSON3.write(doc_object)
-                )
-            end
-        """
-        response = await agent.context.beaker_kernel.evaluate(
-            code,
-            parent_header={},
-        )
-        docs = response["return"]["docs"]
-        return docs
+        except Exception as e:
+            self.logger.error(str(e))
+            raise ValueError(f"Failed to add example: {str(e)}")

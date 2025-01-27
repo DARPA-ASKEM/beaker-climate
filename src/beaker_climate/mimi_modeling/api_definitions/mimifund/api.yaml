@@ -22,6 +22,7 @@ modification: !load documentation/mimi_modification.md
 existing_model: !load documentation/mimi_existing_model.md
 components: !load documentation/components.md
 parameters: !load documentation/parameters.md
+examples: !load documentation/examples.md
 documentation: |
     This is a Julia library. You will be reading the documentation and writing Julia code to interface with the library.
 
@@ -48,3 +49,7 @@ documentation: |
     ```
     {parameters}
     ```
+
+    Here are a set of examples of how to use the API:
+
+    {examples}
