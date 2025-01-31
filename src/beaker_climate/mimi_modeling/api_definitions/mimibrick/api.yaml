@@ -1,0 +1,37 @@
+name: mimibrick
+cache_key: api_assistant_mimibrick
+description: |
+    This is an integrated assessment model built on top of Mimi.
+
+    MimiBRICK.jl is an implementation of the Building Blocks for Relevant Ice and Climate Knowledge (BRICK) semi-empirical model for sea-level change in the Mimi integrated modeling framework (https://www.mimiframework.org/). The Mimi modeling framework is a coding platform that facilitates coupling models and running coupled modeling experiments. MimiBRICK.jl is flexible, efficient, and modular, to facilitate incorporating BRICK into coupled models and integrated assessments of climate impacts in a modular fashion to provide global average as well as local sea-level projections. This focus on tight model coupling and integrated modeling is a key feature of MimiBRICK.jl and broader Mimi modeling framework.
+
+readme: !load documentation/readme.md
+calibration: !load documentation/examples-calibration
+downscaling: !load documentation/examples-downscaling 
+hindcast: !load documentation/examples-hindcast
+examples_main: !load documentation/examples-main.md
+
+documentation: |
+    MimiBRICK.jl is an implementation of the Building Blocks for Relevant Ice and Climate Knowledge (BRICK) semi-empirical model for sea-level change in the Mimi integrated modeling framework (https://www.mimiframework.org/). The Mimi modeling framework is a coding platform that facilitates coupling models and running coupled modeling experiments. MimiBRICK.jl is flexible, efficient, and modular, to facilitate incorporating BRICK into coupled models and integrated assessments of climate impacts in a modular fashion to provide global average as well as local sea-level projections. This focus on tight model coupling and integrated modeling is a key feature of MimiBRICK.jl and broader Mimi modeling framework.
+
+    This implementation includes examples for using observational data to calibrate the model, as well as various configurations in which MimiBRICK.jl is coupled to other climate model components. For users who do not wish to re-run computationally intensive model calibration algorithms, this implementation also includes scripts for using existing calibration output for standard future climate change scenarios, and examples downscaling these global projections for assessments of local impacts. Pre-run model calibration and simulation output can be found in the accompanying Zenodo repository.
+
+    Here is the library's readme. 
+
+    {readme}
+
+    Here are some general examples. 
+
+    {examples_main}
+
+    Here are some calibration examples. 
+
+    {calibration}
+
+    Here are some downscaling examples.
+
+    {downscaling}
+
+    Here are some hindcast examples.
+
+    {hindcast}

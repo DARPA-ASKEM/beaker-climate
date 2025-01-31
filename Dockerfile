@@ -58,7 +58,12 @@ WORKDIR /jupyter
 # Install required Julia packages for Mimi (these are used in the procedures/*.jl files)
 RUN julia -e 'using Pkg; Pkg.add(["Mimi"]); using Mimi'
 # Install MimiFund from GitHub
-RUN julia -e 'using Pkg; Pkg.add(url="https://github.com/fund-model/MimiFUND.jl.git"); using MimiFUND'
+RUN julia -e 'using Pkg; Pkg.add(url="https://github.com/fund-model/MimiFUND.jl.git"); using MimiFUND;'
+
+# other mimi models 
+RUN julia -e 'using Pkg; Pkg.add("MimiBRICK"); using MimiBRICK;'
+RUN julia -e 'using Pkg; Pkg.add(url="https://github.com/anthofflab/MimiFAIRv2.jl.git"); using MimiFAIRv2;'
+
 
 # Service
 CMD ["python", "-m", "beaker_kernel.server.main", "--ip", "0.0.0.0"]

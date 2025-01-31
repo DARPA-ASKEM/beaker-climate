@@ -1,0 +1,112 @@
+
+MimiBRICK Downscaling Example
+
+This notebook contain examples of the downscaling functionalities in the MimiBRICK.jl package.
+Step 1. Environment Setup
+
+For this example, this notebook will run using the environment defined by the Manifest.toml and Project.toml files within this examples folder. If you wish to follow along and type these out on your local machine, you will need to set up a matching Julia environment. Since MimiBRICK is the only required package, this is most easily done with the following code in your REPL:
+
+using Pkg
+
+and
+
+Pkg.add(MimiBRICK)
+
+or equivalently use the ] key to enter the Pkg REPL, then add MimiBRICK followed by backspace to exit the Pkg REPL.
+
+The following activates the environment within this notebook.
+
+# Activate the examples environment 
+using Pkg # here in case you didn't need to run the above command to instantiate
+Pkg.activate(".")
+Pkg.instantiate()
+Pkg.status() # Check which packages are loaded
+     
+
+Now we use the following to load MimiBRICK
+
+using MimiBRICK
+     
+Step 2. Directories and Data
+
+First we define and create the directory that will hold the results. In this case we will create a folder downscaling_results in the current examples directory.
+
+my_output_dir = joinpath(@__DIR__, "downscaling_results")
+
+# if the path already exists, clean it out
+isdir(my_output_dir) ? rm(my_output_dir, recursive = true) : nothing
+
+# recreate the folder
+mkpath(my_output_dir);
+     
+
+Next we can download the necessary files from our Zenodo repository into this folder. This example uses the model projections resulting from the parameter samples for the BRICK standalone simulations. Parameter sets and ensemble simulations for the other model configurations (DOECLIM-BRICK and SNEASY-BRICK) can be found in the Zenodo repository here: https://zenodo.org/record/6626335.
+
+Alternatively, you can use your own previous simulations (say, some that you created from the HindcastProjections_Example.ipynb notebook).
+
+# get the zip folder of model output for projections
+filename = "brick_projections_csv.zip"
+gmslfile = joinpath(my_output_dir,filename)
+#if !isdir(gmslfile[1:(end-4)])
+if !isfile(gmslfile)
+    url = "https://zenodo.org/record/6626335/files/"*filename
+    download(url, gmslfile)
+    run(pipeline(`unzip 
+(my_output_dir)`));
+end
+     
+Step 3. Run Downscaling
+
+Finally we use the MimiBRICK.downscale_brick function to downscale the BRICK global sea level projections to local. The MimiBRICK.downscale_brick function downscales the BRICK global sea level projections to local. This uses the sea-level "fingerprints" of Slangen et al. (2014).
+
+This routine will downscale either a full ensemble of BRICK model simulations or just the maximum a posteriori model simulation to a specific latitude and longitude point. These are provided by the user as lat (degrees north) and lon (degrees east). Other needed function arguments include:
+
+    results_dir - (String) the directory holding model outputs
+    model_config - (String) one of "brick", "doeclimbrick", or "sneasybrick". Only the BRICK projections are being downscaled (no CO2 or temperature, for example), but the downscale_brick function will find the relevant input - data and tag the output files appropriately based on the model_config setting.
+    proj_or_hind - (String) one of "proj" (projections) or "hind" (hindcast). They're treated similarly when running the model, but this helps for finding the output files in the results directories.
+    rcp_scenario - (String, default = "RCP85") one of "RCP26", "RCP45", "RCP60", or "RCP85". If running a hindcast, this does not matter.
+    ensemble_or_map - (String) one of "ensemble" or "map". If "ensemble", then will downscale the full BRICK ensemble that matches the provided model_config, proj_or_hind, and rcp_scenario settings. If "map", will only - downscale the maximum a posteriori simulation.
+
+The downscaling routine will automatically create a subdirectory in the output directory's hindcast_csv or projections_csv/RCPXX/ subdirectory (depending on specification of proj_or_hind argument) called localslr. In this subdirectory, the routine will save an output file with the downscaled local mean sea level change model output.
+
+The MimiBRICK.downscale_brick function signature is as follows:
+
+    downscale_brick(;lon::Float64, 
+                                lat::Float64, 
+                                results_dir::String, 
+                                proj_or_hind::String, 
+                                ensemble_or_map::String, 
+                                model_config::String, 
+                                rcp_scenario::String="RCP85"
+                            )
+
+Arguments:
+
+    lon = longitude (degrees East) of location for downscaling
+    lat = latitude (degrees North) of location for downscaling
+    results_dir = the top level directory of results
+    proj_or_hind = "proj" for projections, or "hind" for hindcast
+    ensemble_or_map = "ensemble" for entire posterior ensemble, or "map" for the maximum a posteriori ensemble member (single simulation)
+    model_config = "brick", "doeclimbrick", or "sneasybrick"
+    rcp_scenario = "RCP26", "RCP45", "RCP60", or "RCP85" (default). Doesn't matter for hindcast.
+
+In this example we will downscale to the location of New York City, so we first set the lat and lon variables to be passed as arguments to downsacle_brick.
+
+# Lat and Lon for New York City
+lat = 40.7128        # deg N
+lon = 360 - 74.0060  # 74.0060 deg W
+     
+
+Next we run the downscale_brick function for local sea-level projections, using the ensemble option (ensemble_or_map="ensemble"), which will downscale the full BRICK ensemble.
+
+years, lsl_proj_ens = MimiBRICK.downscale_brick(lon=lon, lat=lat, results_dir=my_output_dir, 
+                                                proj_or_hind="proj", ensemble_or_map="ensemble", 
+                                                model_config="brick", rcp_scenario="RCP85");
+     
+
+A second option is to use the map option (ensemble_or_map="map"), which will only downscale the maximum a posteriori simulation. NOTE this will overwrite the files produced in the previous cell.
+
+years, lsl_proj_ens = MimiBRICK.downscale_brick(lon=lon, lat=lat, results_dir=my_output_dir, 
+                                                proj_or_hind="proj", ensemble_or_map="map", 
+                                                model_config="brick", rcp_scenario="RCP85");
+     
