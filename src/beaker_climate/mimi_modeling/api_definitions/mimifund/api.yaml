@@ -1,21 +1,23 @@
 name: mimifund 
 cache_key: api_assistant_mimifund
 description: |
-    This is an integrated assessment model built on top of Mimi.
+  This is an integrated assessment model built on top of Mimi.
 
-    The Climate Framework for Uncertainty, Negotiation and Distribution (FUND) is a so-called integrated assessment model of climate change. FUND was originally set-up to study the role of international capital transfers in climate policy, but it soon evolved into a test-bed for studying impacts of climate change in a dynamic context, and it is now often used to perform cost-benefit and cost-effectiveness analyses of greenhouse gas emission reduction policies, to study equity of climate change and climate policy, and to support game-theoretic investigations into international environmental agreements.
+  The Climate Framework for Uncertainty, Negotiation and Distribution (FUND) is a so-called integrated assessment model of climate change. FUND was originally set-up to study the role of international capital transfers in climate policy, but it soon evolved into a test-bed for studying impacts of climate change in a dynamic context, and it is now often used to perform cost-benefit and cost-effectiveness analyses of greenhouse gas emission reduction policies, to study equity of climate change and climate policy, and to support game-theoretic investigations into international environmental agreements.
 
-    FUND links scenarios and simple models of population, technology, economics, emissions, atmospheric chemistry, climate, sea level, and impacts. Together, these elements describe not-implausible futures. The model runs in time-steps of one year from 1950 to 2300, and distinguishes 16 major world regions.
+  FUND links scenarios and simple models of population, technology, economics, emissions, atmospheric chemistry, climate, sea level, and impacts. Together, these elements describe not-implausible futures. The model runs in time-steps of one year from 1950 to 2300, and distinguishes 16 major world regions.
 
-    FUND further includes the option to reduce emissions of industrial carbon dioxide. Reductions can be set by the user, or calculated so as to meet certain criteria set by the user.
+  FUND further includes the option to reduce emissions of industrial carbon dioxide. Reductions can be set by the user, or calculated so as to meet certain criteria set by the user.
 
-    An integrated assessment model, FUND is used to advice policymakers about proper and not-so-proper strategies. The model, however, always reflects its developer's world views. It is therefore regularly contrary to the rhetoric of politicians, and occasionally politically incorrect.
+  An integrated assessment model, FUND is used to advice policymakers about proper and not-so-proper strategies. The model, however, always reflects its developer's world views. It is therefore regularly contrary to the rhetoric of politicians, and occasionally politically incorrect.
 
-    For a detailed understanding of the model, information about the model itself is provided below.
+  For a detailed understanding of the model, information about the model itself is provided below.
 
-    {model}
+  ```
+  {model}
+  ```
 
-documentation: !load documentation/readme.md
+readme: !load documentation/readme.md
 model: !load documentation/science.md
 mimi: !load documentation/mimi.md
 modification: !load documentation/mimi_modification.md
@@ -24,32 +26,40 @@ components: !load documentation/components.md
 parameters: !load documentation/parameters.md
 examples: !load documentation/examples.md
 documentation: |
-    This is a Julia library. You will be reading the documentation and writing Julia code to interface with the library.
+  This is a Julia library. You will be reading the documentation and writing Julia code to interface with the library.
 
-    If you are running an existing model, refer to the documentation below, provided in backticks.
+  If you are running an existing model, refer to the documentation below, provided in backticks.
 
-    ```
-    {existing_model}
-    ```
+  ```
+  {existing_model}
+  ```
 
-    If you are asked to modify parameters or do something involving Components, refer to the documentation below. 
+  If you are asked to modify parameters or do something involving Components, refer to the documentation below. 
 
-    ```
-    {modification}
-    ```
+  ```
+  {modification}
+  ```
 
-    A list of Components valid for use with MimiFUND are provided below in backticks.
+  A list of Components valid for use with MimiFUND are provided below in backticks.
 
-    ```
-    {components}
-    ```
+  ```
+  {components}
+  ```
 
-    A list of Parameter Names valid for use with MimiFUND are provided below in backticks.
+  A list of Parameter Names valid for use with MimiFUND are provided below in backticks.
 
-    ```
-    {parameters}
-    ```
+  ```
+  {parameters}
+  ```
 
-    Here are a set of examples of how to use the API:
+  Here are a set of examples of how to use the API:
 
-    {examples}
+  ```
+  {examples}
+  ```
+
+  Here is the readme:
+
+  ```
+  {readme}
+  ```
