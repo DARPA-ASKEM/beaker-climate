@@ -1,0 +1,157 @@
+
+MimiBRICK Calibration Example
+
+This notebook contain an example of the calibration functionalities in the MimiBRICK.jl package, as well as run projections and hindcasts off of the calibration step, and downscaling the results. For more detailed descriptions of the functions to run projections and hindcasts, and perform downscaling, see the HindcastProjections_Example.ipynb and Downscaling_Example.ipynb files respectively. The calibration_driver.jl script is provided here in the /examples directory too, as it was used to generate the large ensembles on Zenodo that are used in downscaling and hindcast/projections examples, in lieu of new user-defined model simulations.
+Step 1. Environment Setup
+
+For this example, this notebook will run using the environment defined by the Manifest.toml and Project.toml files within this examples folder. If you wish to follow along and type these out on your local machine, you will need to set up a matching Julia environment. Since MimiBRICK is the only required package, this is most easily done with the following code in your REPL:
+
+using Pkg
+
+and
+
+`Pkg.add(MimiBRICK)
+
+or equivalently use the ] key to enter the Pkg REPL, then add MimiBRICK followed by backspace to exit the Pkg REPL.
+
+The following activates the environment within this notebook.
+
+# Activate the examples environment 
+using Pkg # here in case you didn't need to run the above command to instantiate
+Pkg.activate(".")
+Pkg.instantiate()
+Pkg.status() # Check which packages are loaded
+     
+
+Now we use the following to load MimiBRICK
+
+using MimiBRICK
+     
+Step 2. Directories
+
+First we define and create the directory that will hold the results. In this case we will create a folder calibration_results in the current examples directory.
+
+my_output_dir = joinpath(@__DIR__, "calibration_results")
+
+# if the path already exists, clean it out
+isdir(my_output_dir) ? rm(my_output_dir, recursive = true) : nothing
+
+# recreate the folder
+mkpath(my_output_dir);
+     
+Step 3. Run Calibration
+
+The calibration that is done here follows the same general procedure as outlined in Wong et al. (2017) and other works using BRICK. In particular, we:
+
+    run a Markov chain Monte Carlo calibration using 20 million iterations
+    remove at least 1 million iterations from the beginning of the Markov chain for burn-in
+        the specific length depends on the model configuration; Gelman and Rubin (1992) potential scale reduction factor is checked < 1.1 for convergence
+    subsample 10,000 concomitant parameter sets from the remaining burned-in chain. These samples are used for the hindcast and projections for analysis
+
+This can all done by running the examples/calibration_driver.jl script. This script runs the MimiBRICK.run_calibration function three times: using model_config=brick, doeclimbrick and sneasybrick. If you want to verify that things are working properly but not wait hours for results, then it is recommended that you try a shorter calibration, as we do here in this example notebook, and is achieved by by modifying the arguments for:
+
+    total_chain_length - for the three configurations, 1 million iterations typically takes less than an hour on a standard modern (circa 2020) multi-core desktop computer. If you are just checking that things are working properly, doing 10,000 would of course be faster, and likely sufficient
+    burnin_length - this must be less than total_chain_length
+    threshold_gr - if you do a short test calibration, it will yell at you that some of the parameters' potential scale reduction factors are not less than this threshold. You don't need to do anything about it unless you are running your own new "production" calibration; just letting you know so you don't worry about it.
+    size_subsample - the size of the subsample generated so you don't have to tote around giant data sets of calibrated parameter values and model output; must be less than total_chain_length - burnin_length
+
+The run_calibration function will create a subfolder for the model_config in the user-defined output_dir (here we set it to calibration_results). Within that results directory, you will find:
+
+    parameters_full_chain_(model_config).csv - the full Markov chain of parameter samples, including the burn-in period
+    mcmc_log_post_(model_config).csv - the log-posterior scores (numerator from Bayes' theorem) for the full chain of parameter samples
+    parameters_subsample_(model_config).csv - the parameter values in the sub-sample for analysis
+    log_post_subsample_(model_config).csv - the log-posterior scores for the sub-sample of parameters for analysis. This is used to determine the maximum a posteriori simulation
+    proposal_covariance_matrix_(model_config).csv - the final proposal covariance matrix for the adaptive proposals. If you use this and the final sample of parameters from parameters_full_chain_(model_config).csv, you can restart the Markov chain calibration. This and the last iteration of the Markov chain are both saved under the calibration_data/from_calibration_chains subdirectory.
+    mcmc_acceptance_rate_(model_config).csv - the acceptance rate from the MCMC algorithm. Should be about 0.23 for the numbers of parameters (dimension) that we're dealing with here.
+
+Note that calibrations of 20 million iterations will take multiple hours to complete.
+
+    For BRICK on its own, this took about 8 hours on a standard desktop workstation (ca. 2020)
+    For DOECLIM-BRICK and SNEASY-BRICK, this will take closer to 15 hours or so (using that same machine)
+
+The full function signature for MimiBRICK.run_calibration is as follows:
+
+    run_calibration(;   output_dir::String, 
+                        model_config="brick", 
+                        calibration_start_year=1850, 
+                        calibration_end_year=2005,
+                        total_chain_length=1000, 
+                        burnin_length=0, 
+                        threshold_gr=1.1, 
+                        num_walkers=2,
+                        size_subsample=1000, 
+                        start_from_priors=false,
+                        calibration_data_dir::Union{String, Nothing} = nothing
+                    )
+
+Next we define various settings for the MimiBRICK.run_calibration function. Note that if you do not wish to change the default setting, then the argument can be excluded from the call. We include them below for illustrative purposes.
+
+model_config            = "brick"
+total_chain_length      = 1000
+burnin_length           = 0
+threshold_gr            = 1.1
+size_subsample          = 100
+calibration_start_year  = 1850
+calibration_end_year    = 2017
+num_walkers             = 2
+start_from_priors       = false;
+     
+
+Note that to produce the results hosted on Zenodo, different settings were used such that the process takes over 8 hours. Specifically, the total_chain_length was set to 20_000_000 (20 million) and size_subsample to 10_000 (ten thousand). With only total_chain_length = 1000, this should only take a few minutes.
+
+Next we run the calibration!
+
+MimiBRICK.run_calibration(  output_dir=my_output_dir, 
+                            model_config=model_config, 
+                            calibration_start_year=calibration_start_year, 
+                            calibration_end_year=calibration_end_year,
+                            total_chain_length=total_chain_length, 
+                            burnin_length=burnin_length, 
+                            threshold_gr=threshold_gr, 
+                            num_walkers=num_walkers,
+                            size_subsample=size_subsample, 
+                            start_from_priors=start_from_priors
+                        );
+     
+
+The run_calibration function will create a subfolder for the model_config in the user-defined output_dir with a host of output files.
+Step 4. Run Hindcast and Projections
+
+for more details on these steps see HindcastProjections_Example.ipynb
+
+First we run the hindcast period 1850-2017 using the MimiBRICK.run_hindcast function, for model_config = brick. For the hindcast, no RCP scenario needs to be specified, because all of them follow historical radiative forcing/emissions trends up to 2005, and they diverge by only a little bit in the next few years.
+
+The standard set of parameters that are being used for the hindcast and projection simulations are the sub-sample of 10,000 from the MCMC calibration described above (parameters_subsample_(model_config).csv).
+
+This script will add model configuration-specific directory that was constructed above (or came with the model codes). It will create a sub-directory called hindcast_csv which will be populated with CSV files that include the simulated hindcasts of the model output fields. Each of these names is appended with model_config (brick, doeclimbrick, or sneasybrick) and contains one hindcast simulation for each of the sets of parameters in the sub-sample for analysis. Rows correspond to different years (1850-2017 be default) and columns each correspond to different ensemble members.
+
+MimiBRICK.run_hindcast(output_dir=my_output_dir, model_config=model_config);
+     
+
+Next we run the projections for the period 1850-2300 (but can be modified to any period between 1765 and 2300) by using the MimiBRICK.run_projections function, using model_config=brick, doeclimbrick or sneasybrick and rcp_scenario="RCP26", "RCP45", "RCP60", or "RCP85". Note that the RCP scenario forcing files are all the same until 2005, and the provided stand-alone BRICK temperature and ocean heat forcing files cover the period 1850-2300. Those forcing files contain calibrated SNEASY model output for temperature and ocean heat uptake.
+
+This script will add to the model configuration-specific directory that was constructed above (or came with the model codes). It will create a sub-directory called projections_csv, and a sub-directory within there that is specific to each RCP scenario used will be created. The projections files are analogous to the hindcast files that are generated, and will populate the projections_csv/[RCP scenario] directory.
+
+MimiBRICK.run_projections(output_dir=my_output_dir, model_config=model_config);
+     
+Step 5. Downscale
+
+for more details on these steps see Downscaling_Example.ipynb
+
+Finally we use the MimiBRICK.downscale_brick function to downscale the BRICK global sea level projections to local. This uses the sea-level "fingerprints" of Slangen et al. (2014). The downscaling routine will automatically create a subdirectory in the output directory called localslr. In this subdirectory, the routine will save an output file with the downscaled local mean sea level change model output.
+
+This example takes New York City, USA as a test case. Note that latitude (lat) must be provided as degrees North (-90 to 90) and longitude (lon) must be provided as degrees East (0 to 360).
+
+# Lat and Lon for New York City
+lat=40.7128 # deg N
+lon=360-74.0060; # 74.0060 deg W
+     
+
+We can run the hindcast and projections using the model simulations from above, downscaled for New York City, as follows. More information about the specific function arguments can be found in Downscaling_Example.ipynb.
+
+# downscale hindcast
+years, lsl_hind_ens=MimiBRICK.downscale_brick(lon=lon, lat=lat, results_dir=my_output_dir, proj_or_hind="hind", ensemble_or_map="ensemble", model_config="brick", rcp_scenario="RCP85");
+
+# downscale proejction
+years, lsl_proj_ens=MimiBRICK.downscale_brick(lon=lon, lat=lat, results_dir=my_output_dir, proj_or_hind="proj", ensemble_or_map="ensemble", model_config="brick", rcp_scenario="RCP85");
+     

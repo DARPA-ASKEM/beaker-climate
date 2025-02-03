@@ -37,9 +37,16 @@ class MimiModelingAgent(BaseAgent):
     def __init__(self, context: BaseContext = None, tools: list | None = None, **kwargs):
         genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
         self.root_folder = pathlib.Path(__file__).resolve().parent
-        self.api_def_dir = os.path.join(self.root_folder, 'api_definitions/mimifund')
+        self.api_def_dir = os.path.join(self.root_folder, 'api_definitions/')
+        
+        self.api_specs = []
+        for d in os.listdir(self.api_def_dir):
+            api_dir = os.path.join(self.api_def_dir, d)
+            if os.path.isdir(api_dir):
+                api_yaml = pathlib.Path(os.path.join(api_dir, 'api.yaml'))
+                api_spec = load_yaml_api(api_yaml)
+                self.api_specs.append(api_spec)
 
-        api_spec = load_yaml_api(pathlib.Path(os.path.join(self.api_def_dir, 'api.yaml')))
         drafter_config = {'provider': 'anthropic', 'model': 'claude-3-5-sonnet-latest', 'api_key': os.environ.get("ANTHROPIC_API_KEY")}
 
         super().__init__(context, tools, **kwargs)
@@ -49,17 +56,18 @@ class MimiModelingAgent(BaseAgent):
         self.logger = logging.getLogger(__name__)
 
         try:
-            self.api = AdhocApi(logger=self.logger, drafter_config=drafter_config, apis=[api_spec])
+            self.api = AdhocApi(logger=self.logger, drafter_config=drafter_config, apis=self.api_specs)
         except ValueError as e:
             self.add_context(f"The APIs failed to load for this reason: {str(e)}. Please inform the user immediately.")
             self.api = None
 
         additional_context = f"""\
-            You have access to a special integration with a specific API: {api_spec["name"]}.
-            Here is a description of this API: {api_spec["description"]}.
+            You have access to special integration with a set of MIMI framework integrated assessment models. 
+            
+            They are: {api_spec["name"] for api_spec in self.api_specs}.
 
-            If you are asked for information about this API, you should use the `ask_api` tool to get more information about the API.
-            If you are asked to use this API, you should use the `use_api` tool generate code for you to run for the API.
+            If you are asked for information about these APIs, you should use the `ask_api` tool to get more information about the relevant API.
+            If you are asked to use one of these API, you should use the `use_api` tool generate code for you to run for that API.
             """
 
         self.add_context(additional_context)

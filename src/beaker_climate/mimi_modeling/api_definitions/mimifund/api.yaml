@@ -11,10 +11,6 @@ description: |
 
     An integrated assessment model, FUND is used to advice policymakers about proper and not-so-proper strategies. The model, however, always reflects its developer's world views. It is therefore regularly contrary to the rhetoric of politicians, and occasionally politically incorrect.
 
-    For a detailed understanding of the model, information about the model itself is provided below.
-
-    {model}
-
 documentation: !load documentation/readme.md
 model: !load documentation/science.md
 mimi: !load documentation/mimi.md
@@ -25,6 +21,10 @@ parameters: !load documentation/parameters.md
 examples: !load documentation/examples.md
 documentation: |
     This is a Julia library. You will be reading the documentation and writing Julia code to interface with the library.
+
+    For a detailed understanding of the model, information about the model itself is provided below.
+
+    {model}    
 
     If you are running an existing model, refer to the documentation below, provided in backticks.
 

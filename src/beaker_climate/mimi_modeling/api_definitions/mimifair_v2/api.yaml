@@ -1,0 +1,26 @@
+name: mimifair_v2
+cache_key: api_assistant_mimifair
+description: |
+  This is an integrated assessment model built on top of Mimi.
+
+  This is for the model FaIRv2.0.0: a generalized impulse response model for climate uncertainty and future scenario exploration
+  
+  Here is the abstract.
+  Here we present an update to the FaIR model for use in probabilistic future climate and scenario exploration, integrated assessment, policy analysis, and education. In this update we have focussed on identifying a minimum level of structural complexity in the model. The result is a set of six equations, five of which correspond to the standard impulse response model used for greenhouse gas (GHG) metric calculations in the IPCC's Fifth Assessment Report, plus one additional physically motivated equation to represent state-dependent feedbacks on the response timescales of each greenhouse gas cycle. This additional equation is necessary to reproduce non-linearities in the carbon cycle apparent in both Earth system models and observations. These six equations are transparent and sufficiently simple that the model is able to be ported into standard tabular data analysis packages, such as Excel, increasing the potential user base considerably. However, we demonstrate that the equations are flexible enough to be tuned to emulate the behaviour of several key processes within more complex models from CMIP6. The model is exceptionally quick to run, making it ideal for integrating large probabilistic ensembles. We apply a constraint based on the current estimates of the global warming trend to a million-member ensemble, using the constrained ensemble to make scenario-dependent projections and infer ranges for properties of the climate system. Through these analyses, we reaffirm that simple climate models (unlike more complex models) are not themselves intrinsically biased “hot” or “cold”: it is the choice of parameters and how those are selected that determines the model response, something that appears to have been misunderstood in the past. This updated FaIR model is able to reproduce the global climate system response to GHG and aerosol emissions with sufficient accuracy to be useful in a wide range of applications and therefore could be used as a lowest-common-denominator model to provide consistency in different contexts. The fact that FaIR can be written down in just six equations greatly aids transparency in such contexts.
+
+readme: !load documentation/readme.md
+monte_carlo: !load documentation/monte_carlo.jl
+
+documentation: |
+  This is a Julia library. You will be reading the documentation and writing Julia code to interface with the library.
+
+  If you are running an existing model, refer to the documentation below, provided in backticks.
+
+  Here is the library's readme. 
+  ```
+  {readme}
+  ```
+  For additional assistance with running Monte Carlo simulations, use the following as a reference:
+  ```
+  {monte_carlo}
+  ```
