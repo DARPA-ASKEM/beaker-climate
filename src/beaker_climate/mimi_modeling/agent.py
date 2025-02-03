@@ -62,11 +62,12 @@ class MimiModelingAgent(BaseAgent):
             self.api = None
 
         additional_context = f"""\
-            You have access to a special integration with a specific API: {api_spec["name"]}.
-            Here is a description of this API: {api_spec["description"]}.
+            You have access to special integration with a set of MIMI framework integrated assessment models. 
+            
+            They are: {api_spec["name"] for api_spec in self.api_specs}.
 
-            If you are asked for information about this API, you should use the `ask_api` tool to get more information about the API.
-            If you are asked to use this API, you should use the `use_api` tool generate code for you to run for the API.
+            If you are asked for information about these APIs, you should use the `ask_api` tool to get more information about the relevant API.
+            If you are asked to use one of these API, you should use the `use_api` tool generate code for you to run for that API.
             """
 
         self.add_context(additional_context)
