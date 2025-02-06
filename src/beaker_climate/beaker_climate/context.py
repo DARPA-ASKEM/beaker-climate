@@ -20,3 +20,8 @@ class ClimateDataUtilityContext(BeakerContext):
 
     def __init__(self, beaker_kernel: "BeakerKernel", config: Dict[str, Any]) -> None:
         super().__init__(beaker_kernel, ClimateDataUtilityAgent, config)
+
+    async def setup(self, context_info=None, parent_header=None):
+        # Custom setup can be done here
+        code = self.get_code("setup")
+        await self.evaluate(code)
