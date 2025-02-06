@@ -8,6 +8,7 @@ import pandas
 import matplotlib.pyplot as plt
 import xarray as xr
 
+from typing import Callable
 from archytas.react import Undefined
 from archytas.tool_utils import AgentRef, LoopControllerRef, ReactContextRef, tool
 
@@ -16,10 +17,10 @@ from beaker_kernel.lib.context import BaseContext
 
 from pathlib import Path
 
+from .pangeo import CMIP6Catalog
+
 logger = logging.getLogger(__name__)
 
-from time import sleep
-from .search.esgf_search import ESGFProvider
 
 class ClimateDataUtilityAgent(BeakerAgent):
     """
@@ -29,177 +30,161 @@ class ClimateDataUtilityAgent(BeakerAgent):
 
     If you don't have the details necessary to use a tool, you should use the ask_user tool to ask the user for them.
     """
-    def __init__(self, context: BaseContext = None, tools: list = None, **kwargs):
+    def __init__(self, context: BaseContext = None, tools: list = [], **kwargs):
         self.logger = logger
+        self.catalog = CMIP6Catalog()
+        self.last_search : pandas.DataFrame
         super().__init__(context, tools, **kwargs)
 
-        documentation_path=Path(__file__).parent / "api_documentation" / "climate_search.md"
-        initial_context_msg_added = False
-        while not initial_context_msg_added:
-            with open(documentation_path, 'r') as f:
-                try:
-                    self.add_context(f'''\
-        The Earth System Grid Federation (ESGF) is a global collaboration that manages and distributes climate and environmental science data. 
-        It serves as the primary platform for accessing CMIP (Coupled Model Intercomparison Project) data and other climate model outputs.
-        The federation provides a distributed database and delivery system for climate science data, particularly model outputs and observational data.
-        Through ESGF, users can search, discover and access climate datasets from major modeling centers and research institutions worldwide.
-        The system supports authentication, search capabilities, and data transfer protocols optimized for large scientific datasets.
-
-        If datasets are loaded, use xarray with the OpenDAP URL.
-        If the user asks to download a dataset, ask them if they are sure they want to download it.
-
-        Additionally, any data downloaded should be downloaded to the './data/' directory.
-        Please ensure the code makes sure this location exists, and all downloaded data is saved to this location.
-
-        Provided below is the comprehensive documentation of the climate-search tools that you have access to.
-        ALWAYS reference this when using the climate-search tools.                             
-    ```
-    {f.read()}
-    ```
-''')
-                    initial_context_msg_added = True
-                except Exception as e:
-                    sleep(0.5)
-        self.esgf = ESGFProvider(self.oneshot)
-        
-       
     @tool()
-    async def search(self, query: str, agent: AgentRef, loop: LoopControllerRef, react_context: ReactContextRef) -> dict:
+    def search(
+        self, 
+        free_text: Optional[str],
+        keywords: dict[str, str],
+        agent: AgentRef, 
+        loop: LoopControllerRef, 
+        react_context: ReactContextRef
+    ):
         """
-        This tool searches ESGF for datasets.
-        Save the UNMODIFIED JSON output to a variable in the user's notebook.
+        Search the catalog using keywords and/or specific parameters.
+        Prefer using free_text if the keyword attribute is not known for the user's request.
+        Fills the last search state.
+        
+        Example:
+        --------
+            >>> results = search(keywords='temperature', variable_id='tas')
+            >>> results = search(experiment_id='historical', table_id='Amon')
 
         Args:
-            query (str): The user's query to pass to the climate search tool.
+            free_text (str | None): Free-text search across all fields
+            keywords (dict): Specific search parameter attributes (e.g., variable_id='tas', experiment_id='historical')
+                                Valid keys include: 'activity_id', 'experiment_id', 'variable_id', 
+                                'source_id', 'table_id', 'grid_label'            
+        """
+        self.last_search = self.catalog.search(keywords=free_text, *keywords)
+
+    @tool
+    def get_available_values_for_attribute(self, attribute: str) -> list[str]:
+        """
+        Get available values for a specific attribute.
+        
+        Args:
+            attribute (str): The attribute to get values for (e.g., 'activity_id', 'variable_id')
+            
         Returns:
-            dict: ESGF unmodified JSON output to be saved to a variable in the notebook.
+            List[str]: List of available values for the attribute
         """
         try: 
-            return await self.esgf.tool_search(query)
-        except Exception as e:
-            self.add_context(f"The tool failed with this error: {str(e)}. I need to inform the user about this immediately before deciding what to do next. I need to tell the user the exact error with zero summarization.") 
-            return {}
-
-
-    @tool()
-    async def fetch(self, dataset_id: str, agent: AgentRef, loop: LoopControllerRef, react_context: ReactContextRef) -> dict:
+            return self.catalog.get_available_values(attribute)
+        except ValueError:
+            return [f"Invalid attribute. Choose from: {list(self.catalog.unique_values.keys())}"]
+    
+    @tool
+    def get_dataset(self,
+                    target_variable: str,
+                    source_id: Optional[str] = None,
+                    member_id: Optional[str] = None,
+                    chunks: Optional[dict] = None,
+                    ):
         """
-        This tool fetches URLS for datasets.
+        Get an xarray dataset from search results with improved cloud access.
+        Requires there to be a search beforehand.
+
+        Example:
+        --------
+            >>> results = search(variable_id='tas', experiment_id='historical')
+            >>> ds = get_dataset(results, source_id='IPSL-CM6A-LR', member_id='r1i1p1f1')
+            >>> # With preprocessing
+            >>> def preprocess(ds):
+            ...     ds['tas'] = ds['tas'] - 273.15  # Convert to Celsius
+            ...     return ds
+            >>> ds = get_dataset(results, source_id='IPSL-CM6A-LR', preprocess=preprocess)
+
+
+        Args:
+            target_variable (str): Notebook variable to save the dataset to
+            source_id (str | None): Specific model to load (e.g., 'IPSL-CM6A-LR')
+            member_id (str | None): Specific ensemble member to load (e.g., 'r1i1p1f1')
+            chunks (dict | None): Chunk sizes for dask arrays. Default is {'time': 100, 'lat': 45, 'lon': 45}
+        """
+
+        
+        try:
+            url = self.catalog.get_dataset_url(
+                self.last_search, 
+                source_id,
+                member_id,
+                chunks,
+                preprocess=None)
+            s_chunks = chunks if chunks is not None else r"{'time': 100, 'lat': 45, 'lon': 45}"
+            code = f"""
+chunk_dict = {s_chunks}
+storage_options = {{
+    'token': 'anon',  # For anonymous access
+    'default_fill_cache': False,  # Avoid caching issues
+    'default_cache_type': 'none'
+}}
+{target_variable} = xr.open_dataset(
+    {url},
+    engine='zarr',
+    chunks=chunk_dict,
+    backend_kwargs={{'storage_options': storage_options}},
+    **kwargs
+)
+{target_variable}.attrs.update({
+    'source_id': row['source_id'],
+    'member_id': row['member_id'],
+    'experiment_id': row['experiment_id'],
+    'variable_id': row['variable_id'],
+    'grid_label': row['grid_label']
+})
+            """
+            self.tools['run_code'](code)
+        except RuntimeError as e:
+            self.add_context(f"Failed to load dataset: {e}")
+            return ''
+        
+    @tool
+    def summarize_results(self) -> dict:
+        """
+        Summarize search results with counts of models, experiments, etc.
+        Requires a previous search.
+
+        Returns:
+            dict: Summary statistics of the search results
+        """
+        search_results = self.last_search
+        summary = {
+            'total_datasets': len(search_results),
+            'unique_models': search_results['source_id'].nunique(),
+            'unique_experiments': search_results['experiment_id'].nunique(),
+            'models': search_results['source_id'].unique().tolist(),
+            'experiments': search_results['experiment_id'].unique().tolist(),
+            'variables': search_results['variable_id'].unique().tolist()
+        }
+        return summary
+
+    @tool
+    def get_model_details(self, model: str) -> dict:
+        """
+        Get detailed information about a specific model.
         
         Args:
-            dataset_id (str): The user's query to pass to the climate search tool.
-        Returns:
-            dict: ESGF fetch results
-        """
-        try:
-            return self.esgf.tool_fetch(dataset_id)
-        except Exception as e:
-            self.add_context(f"The tool failed with this error: {str(e)}. I should inform the user immediately with the full text of the error.")
-            return {}
+            model (str): Model identifier (source_id)
         
-    # @tool()
-    # async def regrid_dataset(
-    #     self,
-    #     dataset: str,
-    #     target_resolution: tuple,
-    #     agent: AgentRef,
-    #     loop: LoopControllerRef,
-    #     aggregation: Optional[str] = "interp_or_mean",
-    # ) -> str:
-    #     """
-    #     This tool should be used to show the user code to regrid a netcdf dataset with detectable geo-resolution.
-
-    #     If a user asks to regrid a dataset, use this tool to return them code to regrid the dataset.
-
-    #     If you are given a netcdf dataset, use this tool instead of any other regridding tool.
-
-    #     If you are asked about what is needed to regrid a dataset, please provide information about the arguments of this tool.
-
-    #     Args:
-    #         dataset (str): The name of the dataset instantiated in the jupyter notebook.
-    #         target_resolution (tuple): The target resolution to regrid to, e.g. (0.5, 0.5). This is in degrees longitude and latitude.
-    #         aggregation (Optional): The aggregation function to be used in the regridding. The options are as follows:
-    #             'conserve'
-    #             'min'
-    #             'max'
-    #             'mean'
-    #             'median'
-    #             'mode'
-    #             'interp_or_mean'
-    #             'nearest_or_mode'
-
-    #     Returns:
-    #         str: Status of whether or not the dataset has been persisted to the HMI server.
-    #     """
-
-    #     loop.set_state(loop.STOP_SUCCESS)
-    #     code = agent.context.get_code(
-    #         "flowcast_regridding",
-    #         {
-    #             "dataset": dataset,
-    #             "target_resolution": target_resolution,
-    #             "aggregation": aggregation,
-    #         },
-    #     )
-
-    #     result = json.dumps(
-    #         {
-    #             "action": "code_cell",
-    #             "language": "python3",
-    #             "content": code.strip(),
-    #         }
-    #     )
-
-    #     return result
-
-    # @tool()
-    # async def get_netcdf_plot(
-    #     self,
-    #     dataset_variable_name: str,
-    #     agent: AgentRef,
-    #     loop: LoopControllerRef,
-    #     plot_variable_name: Optional[str] = None,
-    #     lat_col: Optional[str] = "lat",
-    #     lon_col: Optional[str] = "lon",
-    #     time_slice_index: Optional[int] = 1,
-    # ) -> str:
-    #     """
-    #     This function should be used to get a plot of a netcdf dataset.
-
-    #     This function should also be used to preview any netcdf dataset.
-
-    #     If the user asks to plot or preview a dataset, use this tool to return plotting code to them.
-
-    #     You should also ask if the user wants to specify the optional arguments by telling them what each argument does.
-
-    #     Args:
-    #         dataset_variable_name (str): The name of the dataset instantiated in the jupyter notebook.
-    #         plot_variable_name (Optional): The name of the variable to plot. Defaults to None.
-    #             If None is provided, the first variable in the dataset will be plotted.
-    #         lat_col (Optional): The name of the latitude column. Defaults to 'lat'.
-    #         lon_col (Optional): The name of the longitude column. Defaults to 'lon'.
-    #         time_slice_index (Optional): The index of the time slice to visualize. Defaults to 1.
-
-    #     Returns:
-    #         str: The code used to plot the netcdf.
-    #     """
-
-    #     code = agent.context.get_code(
-    #         "get_netcdf_plot",
-    #         {
-    #             "dataset": dataset_variable_name,
-    #             "plot_variable_name": plot_variable_name,
-    #             "lat_col": lat_col,
-    #             "lon_col": lon_col,
-    #             "time_slice_index": time_slice_index,
-    #         },
-    #     )
-
-    #     result = await agent.context.evaluate(
-    #         code,
-    #         parent_header={},
-    #     )
-
-    #     output = result.get("return")
-
-    #     return output
+        Returns:
+            dict: Detailed information about the model
+        """
+        model_data = self.cat.df[self.cat.df['source_id'] == model]
+        if len(model_data) == 0:
+            raise ValueError(f"Model {model} not found in catalog")
+        
+        details = {
+            'institution': model_data['institution_id'].iloc[0],
+            'experiments': model_data['experiment_id'].unique().tolist(),
+            'variables': model_data['variable_id'].unique().tolist(),
+            'grid_labels': model_data['grid_label'].unique().tolist(),
+            'ensemble_members': model_data['member_id'].unique().tolist(),
+            'total_datasets': len(model_data)
+        }
+        return details

@@ -48,6 +48,8 @@ dependencies = [
   "netcdf4~=1.6.5",
   "cftime~=1.6.3",
   "dask",
+  "intake",
+  "intake-esm"
 ]
 
 [project.urls]
