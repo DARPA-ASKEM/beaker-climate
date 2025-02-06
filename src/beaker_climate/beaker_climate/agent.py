@@ -55,6 +55,23 @@ class ClimateDataUtilityAgent(BeakerAgent):
         code = agent.context.get_code("search", {"free_text": free_text, "keywords": keywords})
         response = await agent.context.evaluate(code)
         return response["return"]
+    
+    
+    @tool()
+    async def get_dataset(self, source_id: str, member_id: str, agent: AgentRef) -> str:
+        """
+        Get an xarray dataset from search results from pangeo (cmip6).
+
+        Args:
+            source_id (str): The source id of the dataset to get
+            member_id (str): The member id of the dataset to get
+        
+        Returns:
+            str: The dataset
+        """
+        code = agent.context.get_code("get_dataset", {"source_id": source_id, "member_id": member_id})
+        response = await agent.context.evaluate(code)
+        return response["return"]
 
     @tool()
     async def test(self, foo: str) -> str:
