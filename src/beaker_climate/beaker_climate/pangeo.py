@@ -1,11 +1,9 @@
 import intake
 import xarray as xr
 import pandas as pd
-from typing import Dict, List, Union, Optional, Callable
+from typing import Dict, List, Union, Optional
 import warnings
 import fsspec
-import logging 
-logger = logging.getLogger(__name__)
 
 class CMIP6Catalog:
     """
@@ -54,11 +52,8 @@ class CMIP6Catalog:
     def _load_catalog(self):
         """Load the catalog and store basic information."""
         try:
-            logger.warning("intake open")
             self.cat = intake.open_esm_datastore(self.catalog_url)
-            logger.warning("cache unique")
             self._cache_unique_values()
-            self.cat.persist()
         except Exception as e:
             raise ConnectionError(f"Failed to load catalog: {str(e)}")
             
@@ -141,7 +136,7 @@ class CMIP6Catalog:
                     source_id: Optional[str] = None,
                     member_id: Optional[str] = None,
                     chunks: Optional[Dict] = None,
-                    preprocess: Optional[Callable] = None,
+                    preprocess: Optional[callable] = None,
                     **kwargs) -> xr.Dataset:
         """
         Get an xarray dataset from search results with improved cloud access.
@@ -245,80 +240,19 @@ class CMIP6Catalog:
             raise RuntimeError(f"Failed to load dataset: {str(e)}\n"
                              f"URL attempted: {url}")
 
-    def get_dataset_url(self, search_results: pd.DataFrame, 
-                    source_id: Optional[str] = None,
-                    member_id: Optional[str] = None,
-                    chunks: Optional[Dict] = None,
-                    preprocess: Optional[Callable] = None,
-                    **kwargs) -> xr.Dataset:
+    def summarize_results(self, search_results: pd.DataFrame) -> Dict:
         """
-        Get an xarray dataset from search results with improved cloud access.
+        Summarize search results with counts of models, experiments, etc.
         
         Parameters:
         -----------
         search_results : pd.DataFrame
             Results from the search method
-        source_id : str, optional
-            Specific model to load (e.g., 'IPSL-CM6A-LR')
-        member_id : str, optional
-            Specific ensemble member to load (e.g., 'r1i1p1f1')
-        chunks : dict, optional
-            Chunk sizes for dask arrays. Default is {'time': 100, 'lat': 45, 'lon': 45}
-        preprocess : callable, optional
-            Function to apply to dataset before returning
-        **kwargs : dict
-            Additional parameters passed to xarray.open_dataset()
         
         Returns:
         --------
-        str
-            The URL
-        """
-        # Make a copy to avoid modifying the original
-        filtered_results = search_results.copy()
-        
-        # Filter by source_id (model) if specified
-        if source_id:
-            filtered_results = filtered_results[filtered_results['source_id'] == source_id]
-        
-        # Filter by member_id if specified
-        if member_id:
-            filtered_results = filtered_results[filtered_results['member_id'] == member_id]
-        
-        if len(filtered_results) == 0:
-            raise ValueError("No datasets match the specified criteria")
-        
-        if len(filtered_results) > 1:
-            available_models = filtered_results['source_id'].unique()
-            available_members = filtered_results['member_id'].unique()
-            warnings.warn(f"Multiple datasets found ({len(filtered_results)}).\n"
-                        f"Available models: {available_models.tolist()}\n"
-                        f"Available members: {available_members.tolist()}\n"
-                        "Loading the first one.")
-        
-        # Get the first matching dataset
-        row = filtered_results.iloc[0]
-        
-        try:
-            # Use the zstore URL if available, otherwise fall back to regular URL
-            url = row.get('zstore', row.get('path'))
-            if url is None:
-                raise ValueError("No valid URL found in catalog entry")
-            
-            return url 
-        except Exception as e:
-            raise RuntimeError(f"Failed to load dataset: {str(e)}\n"
-                             f"URL attempted: {url}")
-
-    def summarize_results(self, search_results: pd.DataFrame) -> Dict:
-        """
-        Summarize search results with counts of models, experiments, etc.
-        
-        Args:
-            search_results (pd.DataFrame): Results from the search method
-        
-        Returns:
-            dict: Summary statistics of the search results
+        Dict
+            Summary statistics of the search results
         """
         summary = {
             'total_datasets': len(search_results),
@@ -334,11 +268,15 @@ class CMIP6Catalog:
         """
         Get detailed information about a specific model.
         
-        Args:
-            model (str): Model identifier (source_id)
+        Parameters:
+        -----------
+        model : str
+            Model identifier (source_id)
         
         Returns:
-            dict: Detailed information about the model
+        --------
+        Dict
+            Detailed information about the model
         """
         model_data = self.cat.df[self.cat.df['source_id'] == model]
         if len(model_data) == 0:

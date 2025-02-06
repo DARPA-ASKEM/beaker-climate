@@ -49,7 +49,8 @@ dependencies = [
   "cftime~=1.6.3",
   "dask",
   "intake",
-  "intake-esm"
+  "intake-esm",
+  "gcsfs"
 ]
 
 [project.urls]

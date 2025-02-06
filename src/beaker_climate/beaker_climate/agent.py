@@ -16,8 +16,7 @@ from beaker_kernel.lib import BeakerAgent
 from beaker_kernel.lib.context import BaseContext
 
 from pathlib import Path
-
-from .pangeo2 import CMIP6Catalog
+from .pangeo import CMIP6Catalog
 
 logger = logging.getLogger(__name__)
 
@@ -32,8 +31,6 @@ class ClimateDataUtilityAgent(BeakerAgent):
     """
     def __init__(self, context: BaseContext = None, tools: list = [], **kwargs):
         self.logger = logger
-        # self.catalog = CMIP6Catalog()
-        # self.last_search : pandas.DataFrame
         super().__init__(context, tools, **kwargs)
 
     @tool()
@@ -73,99 +70,28 @@ class ClimateDataUtilityAgent(BeakerAgent):
         response = await agent.context.evaluate(code)
         return response["return"]
 
-    @tool()
-    async def test(self, foo: str) -> str:
+    @tool
+    async def get_available_values_for_attribute(self, attribute: str, agent: AgentRef) -> list[str]:
         """
-        This is a test tool.
-
+        Get available values for a specific attribute.
+        The attributes available to you are
+        'source_id'
+        'member_id'
+        'experiment_id'
+        'variable_id'
+        'grid_label'
+        'activity_id'
+        'variable_id'
+        
         Args:
-            foo (str): a string
-
-        Returns:
-            str: the string
-        """
-        return foo
-
-#     @tool
-#     def get_available_values_for_attribute(self, attribute: str) -> list[str]:
-#         """
-#         Get available values for a specific attribute.
-        
-#         Args:
-#             attribute (str): The attribute to get values for (e.g., 'activity_id', 'variable_id')
+            attribute (str): The attribute to get values for (e.g., 'activity_id', 'variable_id')
             
-#         Returns:
-#             List[str]: List of available values for the attribute
-#         """
-#         try: 
-#             return self.catalog.get_available_values(attribute)
-#         except ValueError:
-#             return [f"Invalid attribute. Choose from: {list(self.catalog.unique_values.keys())}"]
-    
-#     @tool
-#     def get_dataset(self,
-#                     target_variable: str,
-#                     source_id: Optional[str] = None,
-#                     member_id: Optional[str] = None,
-#                     chunks: Optional[dict] = None,
-#                     ):
-#         """
-#         Get an xarray dataset from search results with improved cloud access.
-#         Requires there to be a search beforehand.
-
-#         Example:
-#         --------
-#             >>> results = search(variable_id='tas', experiment_id='historical')
-#             >>> ds = get_dataset(results, source_id='IPSL-CM6A-LR', member_id='r1i1p1f1')
-#             >>> # With preprocessing
-#             >>> def preprocess(ds):
-#             ...     ds['tas'] = ds['tas'] - 273.15  # Convert to Celsius
-#             ...     return ds
-#             >>> ds = get_dataset(results, source_id='IPSL-CM6A-LR', preprocess=preprocess)
-
-
-#         Args:
-#             target_variable (str): Notebook variable to save the dataset to
-#             source_id (str | None): Specific model to load (e.g., 'IPSL-CM6A-LR')
-#             member_id (str | None): Specific ensemble member to load (e.g., 'r1i1p1f1')
-#             chunks (dict | None): Chunk sizes for dask arrays. Default is {'time': 100, 'lat': 45, 'lon': 45}
-#         """
-
-        
-#         try:
-#             url = self.catalog.get_dataset_url(
-#                 self.last_search, 
-#                 source_id,
-#                 member_id,
-#                 chunks,
-#                 preprocess=None)
-#             s_chunks = chunks if chunks is not None else r"{'time': 100, 'lat': 45, 'lon': 45}"
-#             code = f"""
-# chunk_dict = {s_chunks}
-# storage_options = {{
-#     'token': 'anon',  # For anonymous access
-#     'default_fill_cache': False,  # Avoid caching issues
-#     'default_cache_type': 'none'
-# }}
-# {target_variable} = xr.open_dataset(
-#     {url},
-#     engine='zarr',
-#     chunks=chunk_dict,
-#     backend_kwargs={{'storage_options': storage_options}},
-#     **kwargs
-# )
-# {target_variable}.attrs.update({
-#     'source_id': row['source_id'],
-#     'member_id': row['member_id'],
-#     'experiment_id': row['experiment_id'],
-#     'variable_id': row['variable_id'],
-#     'grid_label': row['grid_label']
-# })
-#             """
-#             self.tools['run_code'](code)
-#         except RuntimeError as e:
-#             self.add_context(f"Failed to load dataset: {e}")
-#             return ''
+        Returns:
+            List[str]: List of available values for the attribute
+        """
+        code = agent.context.get_code("get_attribute_values", {'attribute': attribute})
+        response = await agent.context.evaluate(code)
+        return response["return"]
         
 #     @tool
 #     def summarize_results(self) -> dict:
