@@ -50,6 +50,7 @@ dependencies = [
   "dask",
   "intake",
   "intake-esm",
+  "intake-xarray",
   "gcsfs"
 ]
 

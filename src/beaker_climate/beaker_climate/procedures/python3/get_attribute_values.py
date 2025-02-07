@@ -1,1 +1,1 @@
-catalog.get_available_values("{{attribute}}")
+{{catalog}}.get_available_values("{{attribute}}")

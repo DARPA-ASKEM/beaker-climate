@@ -15,6 +15,9 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 class ClimateDataUtilityContext(BeakerContext):
+    """
+    You are an agent that loads and helps analyze climate, hydro, atmospheric, and ocean data.
+    """
     compatible_subkernels = ["python3"]
     SLUG = "beaker_climate"
 

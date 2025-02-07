@@ -1,2 +1,2 @@
-results = catalog.search(keywords="{{ free_text }}", **{{ keywords }})
+results = {{catalog}}.search(**{{ keywords }})
 results.to_dict()
