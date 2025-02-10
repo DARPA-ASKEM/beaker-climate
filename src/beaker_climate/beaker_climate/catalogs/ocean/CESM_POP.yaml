@@ -1,0 +1,33 @@
+plugins:
+  source:
+    - module: intake_xarray
+
+sources:
+
+  CESM_POP_hires_control:
+    description: NCAR CESM POP model run hybrid_v5_rel04_BC5_ne120_t12_pop62
+    metadata:
+      time_period: perpetual 2000
+      tags:
+        - ocean
+        - model
+    driver: zarr
+    args:
+      urlpath: gs://pangeo-cesm-pop/control
+      consolidated: True
+      storage_options:
+        requester_pays: True
+
+  CESM_POP_hires_RCP8_5:
+    description: NCAR CESM POP model run BRCP85C5CN_ne120_t12_pop62.c13b17.asdphys.001
+    metadata:
+      time_period: "2000-2050"
+      tags:
+        - ocean
+        - model
+    driver: zarr
+    args:
+      urlpath: gs://pangeo-cesm-pop/rcp8v5
+      consolidated: True
+      storage_options:
+        requester_pays: True

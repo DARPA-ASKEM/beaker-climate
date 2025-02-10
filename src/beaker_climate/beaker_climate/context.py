@@ -8,6 +8,7 @@ from beaker_kernel.lib import BeakerContext
 from beaker_kernel.lib.utils import intercept
 
 from .agent import ClimateDataUtilityAgent
+import pathlib
 
 if TYPE_CHECKING:
     from beaker_kernel.lib import BeakerContext
@@ -26,5 +27,7 @@ class ClimateDataUtilityContext(BeakerContext):
 
     async def setup(self, context_info=None, parent_header=None):
         # Custom setup can be done here
+        catalog_url = pathlib.Path(__file__).parent / 'catalogs/master.yaml'
+        await self.evaluate(f'__catalog_url = "{catalog_url}"')
         code = self.get_code("setup")
         await self.evaluate(code)

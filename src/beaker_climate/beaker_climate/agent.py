@@ -9,6 +9,9 @@ logger = logging.getLogger(__name__)
 
 
 class ClimateDataUtilityAgent(BeakerAgent):
+    """
+    You will be loading catalogs and using the data in them.
+    """
     def __init__(self, context: BaseContext = None, tools: list = [], **kwargs):
         self.logger = logger
         super().__init__(context, tools, **kwargs)
@@ -61,7 +64,9 @@ class ClimateDataUtilityAgent(BeakerAgent):
         react_context: ReactContextRef) -> str:
         """
         Inspect a catalog for details about it.
-
+        This retrieves all dataset names. 
+        Prefer the search tool unless requested.
+        
         Args:
             catalog (str): Loaded catalog with load_catalog
 
@@ -76,9 +81,11 @@ class ClimateDataUtilityAgent(BeakerAgent):
 
 
     @tool()
-    async def search(self, catalog: str, keywords: dict, agent: AgentRef) -> dict:
+    async def search(self, catalog: str, keywords: dict, agent: AgentRef) -> list:
         """
         Search the catalog using keywords.
+        This returns a list of datasets in the catalog that match.
+        You will use this before getting a dataset with get_dataset tool.
         
         Args:
             catalog (str): the catalog you've loaded with load_catalog
@@ -87,7 +94,7 @@ class ClimateDataUtilityAgent(BeakerAgent):
                                 'source_id', 'table_id', 'grid_label'            
 
         Returns:
-            dict: a dictionary of search results (converted from a pandas dataframe)
+            list: a list of search results by dataset name (converted from a pandas dataframe)
         """
         code = agent.context.get_code("search", {"catalog": catalog, "keywords": keywords})
         response = await agent.context.evaluate(code)
@@ -95,20 +102,19 @@ class ClimateDataUtilityAgent(BeakerAgent):
     
     
     @tool()
-    async def get_dataset(self, catalog: str, source_id: str, member_id: str, agent: AgentRef) -> str:
+    async def get_dataset(self, variable_name: str, name: str, agent: AgentRef) -> str:
         """
+        Get a dataset from the prior search and loads it to a given variable.
+        This should be used after the search tool.
         
-        Get an xarray dataset from search results from pangeo.
-
         Args:
-            catalog (str): the catalog you've loaded with load_catalog
-            source_id (str): The source id of the dataset to get
-            member_id (str): The member id of the dataset to get
+            variable_name: the target variable name to save the dataset to
+            name: the dataset from the search results
         
         Returns:
-            str: The dataset
+            str: The dataset, or an error message
         """
-        code = agent.context.get_code("get_dataset", {'catalog': catalog, "source_id": source_id, "member_id": member_id})
+        code = agent.context.get_code("get_dataset", {'name': name, "variable_name": variable_name})
         response = await agent.context.evaluate(code)
         return response["return"]
 

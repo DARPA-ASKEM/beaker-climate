@@ -1,6 +1,5 @@
 import intake
-cat_url = 'https://raw.githubusercontent.com/pangeo-data/pangeo-datastore/master/intake-catalogs/master.yaml'
-pangeo_catalog = intake.open_catalog(cat_url)
+pangeo_catalog = intake.open_catalog(__catalog_url)
 __pangeo_info = { 
     entry._name: {
         'description': entry._description,

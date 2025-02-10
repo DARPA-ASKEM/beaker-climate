@@ -1,2 +1,2 @@
-results = {{catalog}}.search(**{{ keywords }})
-results.to_dict()
+__last_results = {{catalog}}.search(**{{ keywords }})
+__last_results.keys()

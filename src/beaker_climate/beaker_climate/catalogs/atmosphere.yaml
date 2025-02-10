@@ -1,0 +1,106 @@
+plugins:
+  source:
+    - module: intake_xarray
+sources:
+
+  gmet_v1:
+    description: Full GMET version 1 (Newman) met ensemble in zarr format
+    driver: zarr
+    args:
+      urlpath: gs://pangeo-ncar-gmet
+      consolidated: True
+      storage_options:
+        requester_pays: True
+
+  trmm_3b42rt:
+    description: Near real time rainfall estimates from NASA's Tropical Rainfall Measuring Mission
+    metadata:
+      url: 'https://trmm.gsfc.nasa.gov/data_dir/data.html'
+      tags:
+        - precipitation
+        - satellite
+    driver: zarr
+    args:
+      urlpath: gs://pangeo-nasa-trmm
+      consolidated: True
+      storage_options:
+        requester_pays: True
+
+  sam_ngaqua_qobs_eqx_3d:
+    description: 3D fields from a near-global Aquaplanet Simulation with the System for Atmospheric Modeling
+    metadata:
+      tags:
+        - atmosphere
+        - model
+    driver: zarr
+    args:
+      urlpath: gs://pangeo-vulcan-sam/3d
+      consolidated: True
+      storage_options:
+        requester_pays: True
+       
+  sam_ngaqua_qobs_eqx_2d:
+    description: 2D fields from a near-global Aquaplanet Simulation with the System for Atmospheric Modeling
+    metadata:
+      tags:
+        - atmosphere
+        - model
+    driver: zarr
+    args:
+      urlpath: gs://pangeo-vulcan-sam/2d
+      consolidated: True
+      storage_options:
+        requester_pays: True
+
+  gpcp_cdr_daily_v1_3:
+    description: 3D fields from a near-global Aquaplanet Simulation with the System for Atmospheric Modeling
+    metadata:
+      title: "Global Precipitation Climatatology Project (GPCP) Climate Data Record (CDR), Daily V1.3"
+      url: "https://climatedataguide.ucar.edu/climate-data/gpcp-daily-global-precipitation-climatology-project"
+      tags:
+        - atmosphere
+        - model
+    driver: zarr
+    args:
+      urlpath: gs://pangeo-noaa-esrl-gpcp
+      consolidated: True
+      storage_options:
+        requester_pays: True
+
+  wrf50_erai:
+    description: Daily meteorology from 50km WRF simulation forced with ERA-Interim
+    driver: zarr
+    args:
+      urlpath: gs://pangeo-ncar-wrf
+      consolidated: True
+      storage_options:
+        requester_pays: True
+
+  era5_hourly_reanalysis_single_levels_sa:
+    description: "ERA5 hourly estimates of variables on single levels"
+    metadata:
+      url: 'https://cds.climate.copernicus.eu/cdsapp#!/dataset/reanalysis-era5-single-levels'
+      tags:
+      - ocean
+      - model
+      - atmosphere
+    driver: zarr
+    args:
+      urlpath: gs://pangeo-era5/reanalysis/spatial-analysis
+      consolidated: True
+      storage_options:
+        requester_pays: True
+
+  nasa_ccmp_wind_vectors:
+    description: "gap-free 6-hourly surface wind fields"
+    metadata:
+      url: 'https://podaac.jpl.nasa.gov/MEaSUREs-CCMP?sections=about'
+      tags:
+      - ocean
+      - atmosphere
+    driver: zarr
+    args:
+      urlpath: gs://pangeo-nasa-ccmp/zarr
+      consolidated: True
+      storage_options:
+        requester_pays: True

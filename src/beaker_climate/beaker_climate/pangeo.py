@@ -4,6 +4,10 @@ import pandas as pd
 from typing import Dict, List, Union, Optional
 import warnings
 import fsspec
+import pathlib
+import logging 
+
+logger = logging.getLogger(__name__)
 
 class CMIP6Catalog:
     """
@@ -34,7 +38,7 @@ class CMIP6Catalog:
     >>> ds = cat.get_dataset(results, model='IPSL-CM6A-LR')
     """
     
-    def __init__(self, catalog_url: str = "https://storage.googleapis.com/cmip6/pangeo-cmip6.json"):
+    def __init__(self):
         """
         Initialize the CMIP6 catalog.
         
@@ -43,7 +47,8 @@ class CMIP6Catalog:
         catalog_url : str, optional
             URL to the Pangeo CMIP6 catalog
         """
-        self.catalog_url = catalog_url
+        self.catalog_url = pathlib.Path(__file__).parent / '../catalogs/master.yaml'
+        logger.warning(self.catalog_url)
         self._load_catalog()
         
         # Configure default chunks for dask
