@@ -1,4 +1,6 @@
 import logging
+import os
+from pathlib import Path
 from archytas.tool_utils import AgentRef, LoopControllerRef, ReactContextRef, tool
 
 from beaker_kernel.lib import BeakerAgent
@@ -15,6 +17,22 @@ class ClimateDataUtilityAgent(BeakerAgent):
     def __init__(self, context: BaseContext = None, tools: list = [], **kwargs):
         self.logger = logger
         super().__init__(context, tools, **kwargs)
+
+        # Load prompt files and set the Agent context
+        self.root_folder = Path(__file__).resolve().parent
+        prompts_dir = os.path.join(self.root_folder, 'prompts')
+        
+        # Read agent.md first
+        agent_file = os.path.join(prompts_dir, 'agent.md')
+        if os.path.exists(agent_file):
+            with open(agent_file, 'r') as f:
+                self.add_context(f.read())
+        
+        # Read remaining .md files
+        for file in os.listdir(prompts_dir):
+            if file.endswith('.md') and file != 'agent.md':
+                with open(os.path.join(prompts_dir, file), 'r') as f:
+                    self.add_context(f.read())
 
     @tool()
     async def get_catalog_info(self, agent: AgentRef) -> str:
