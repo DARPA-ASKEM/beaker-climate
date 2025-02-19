@@ -5,10 +5,12 @@ from archytas.tool_utils import AgentRef, LoopControllerRef, ReactContextRef, to
 
 from beaker_kernel.lib import BeakerAgent
 from beaker_kernel.lib.context import BaseContext
-
+import google.generativeai as genai
+from google.generativeai import caching
+from adhoc_api.tool import AdhocApi
+from adhoc_api.loader import load_yaml_api
 
 logger = logging.getLogger(__name__)
-
 
 class ClimateDataUtilityAgent(BeakerAgent):
     """
@@ -21,7 +23,7 @@ class ClimateDataUtilityAgent(BeakerAgent):
         # Load prompt files and set the Agent context
         self.root_folder = Path(__file__).resolve().parent
         prompts_dir = os.path.join(self.root_folder, 'prompts')
-        
+
         # Read agent.md first
         agent_file = os.path.join(prompts_dir, 'agent.md')
         if os.path.exists(agent_file):
@@ -33,6 +35,31 @@ class ClimateDataUtilityAgent(BeakerAgent):
             if file.endswith('.md') and file != 'agent.md':
                 with open(os.path.join(prompts_dir, file), 'r') as f:
                     self.add_context(f.read())
+
+        genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
+        
+        # Use the already set root_folder
+        api_def_dir = os.path.join(self.root_folder, 'api_documentation')
+
+        # Get API specs and directories in one pass
+        self.api_specs = []
+        api_yaml = Path(os.path.join(api_def_dir, 'noaa_api.yaml'))
+        api_spec = load_yaml_api(api_yaml)
+        self.api_specs.append(api_spec)
+
+        # Note: not all providers support ttl_seconds
+        ttl_seconds = 1800
+        drafter_config_gemini={'provider': 'google', 'model': 'gemini-1.5-pro-001', 'ttl_seconds': ttl_seconds, 'api_key': os.environ.get("GEMINI_API_KEY", "")}
+        drafter_config_anthropic={'provider': 'anthropic', 'model': 'claude-3-5-sonnet-latest', 'api_key': os.environ.get("ANTHROPIC_API_KEY")}
+        specs = self.api_specs
+
+        try:
+            self.api = AdhocApi(logger=self.logger, drafter_config=[drafter_config_anthropic, drafter_config_gemini], apis=specs)
+        except ValueError as e:
+            self.add_context(f"The APIs failed to load for this reason: {str(e)}. Please inform the user immediately.")
+            self.api = None
+
+        self.api_list = [spec['name'] for spec in specs]
 
     @tool()
     async def get_catalog_info(self, agent: AgentRef) -> str:
@@ -159,4 +186,24 @@ class ClimateDataUtilityAgent(BeakerAgent):
     #     response = await agent.context.evaluate(code)
     #     return response["return"]
     
-        
+
+    @tool()
+    async def consult_noaa_psl(self, query: str, agent: AgentRef, loop: LoopControllerRef, react_context: ReactContextRef) -> str:
+        """
+        This tool is used to ask a question of the NOAA PSL data catalog API. 
+        It allows users to ask questions about the catalog and get back information including available datasets and URLs to download specific files.
+
+        If you use this tool, you MUST indicate so in your thinking. Wrap the tool name in backticks.
+
+        Args: 
+            query (str): The question you want to ask about the NOAA PSL catalog.
+
+        Returns: 
+            str: returns instructions on how to utilize the the NOAA PSL catalog based on the question asked.
+        """
+        try:
+            results = self.api.ask_api("NOAA Physical Sciences Laboratory", query)
+            return f"Here is the information I found about how to use the catalog: \n{results}"
+        except Exception as e:
+            self.logger.error(str(e))
+            
