@@ -26,8 +26,7 @@ def get_files_from_table(url, visited_urls=None, depth=0, max_depth=3):
         time.sleep(0.1)
         response = requests.get(url, timeout=10)
         soup = BeautifulSoup(response.text, 'html.parser')
-        table = soup.find('table', id='indexlist')
-        
+        table = soup.find('table')
         if table:
             for row in table.find_all('tr'):
                 links = row.find_all('a')
@@ -39,18 +38,33 @@ def get_files_from_table(url, visited_urls=None, depth=0, max_depth=3):
                     
                     # Get the base URL without query parameters
                     base_url = url.split('?')[0].rstrip('/')
-                    full_url = f"{base_url}/{href.lstrip('/')}"
-                    
+                    full_url = f"{base_url}{href.lstrip('/')}"
                     if href.endswith('.nc'):
+                        href = href.split('?dataset=')
+                        if len(href) < 2:
+                            print('failed to get opendap url')
+                            continue
+                        href = href[1]
+                        access_url = f"https://psl.noaa.gov/thredds/dodsC/{href.lstrip('/')}"
                         print(f"{'  ' * depth}Found NC file: {href}")  # Debug print
-                        size_cell = row.find('td', class_='indexcolsize')
-                        modified_cell = row.find('td', class_='indexcollastmod')
-                        file_info = {
-                            'url': full_url,
-                            'size': size_cell.text.strip() if size_cell else None,
-                            'last_modified': modified_cell.text.strip() if modified_cell else None
-                        }
-                        result['files'].append(file_info)
+                        # size_cell = row.find('td', class_='indexcolsize')
+                        # modified_cell = row.find('td', class_='indexcollastmod')
+                        
+                        dataset_body = requests.get(full_url, timeout=10)
+                        dataset_soup = BeautifulSoup(dataset_body.text, 'html.parser')
+                        properties = dataset_soup.find('table', attrs='property-table')
+                        if properties:
+                            # size = dataset_soup.select_one('.context > tr:nth-child(2) > td:nth-child(2)')
+                            # last_modified = dataset_soup.select_one('#dates > ul:nth-child(1) > li:nth-child(1)')
+                            file_info = {
+                                'url': access_url,
+                                # 'size': size.text.strip() if size else None,
+                                # 'last_modified': last_modified.text.split(': ')[1].strip() 
+                                #     if last_modified else None
+                            }
+                            result['files'].append(file_info)
+                        else:
+                            print('failed to get properties from dataset')
                     elif href.endswith('/') and depth < max_depth:
                         print(f"{'  ' * depth}Found directory: {href}")  # Debug print
                         try:
@@ -81,9 +95,14 @@ catalog = {}
 
 # Add progress bar
 for item in tqdm(data, desc="Processing datasets"):
-    title = item.get('alt_title', item.get('title', '')).strip()
+    if item.get('path', "") == "":
+        print("skipping pathless dataset")
+    title = item.get('alt_title', "").strip()
+    if title == "":
+        title = item.get('title', '')
+    print(title)
     description = item.get('desc', '').strip().replace('\r\n', '')
-    download_link = f"https://downloads.psl.noaa.gov{item['path']}" if item.get('path') else ''
+    download_link = f"https://psl.noaa.gov/thredds/catalog/{item['path'].lstrip('/')}/catalog.html" if item.get('path') else ''
     
     if download_link:
         print(f"\nProcessing dataset: {title}")

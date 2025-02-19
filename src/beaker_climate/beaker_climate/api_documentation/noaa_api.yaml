@@ -20,24 +20,11 @@ documentation: |
     import os
 
     # URL of the dataset
-    url = 'https://downloads.psl.noaa.gov/Datasets/cru/hadcrut4/air.mon.anom.median.nc'
-
-    # Local filename to save to
-    local_file = 'hadcrut4_air.mon.anom.median.nc'
-
-    # Download the file if it doesn't exist
-    if not os.path.exists(local_file):
-        print(f"Downloading {url} to {local_file}...")
-        response = requests.get(url)
-        with open(local_file, 'wb') as f:
-            f.write(response.content)
-        print("Download complete!")
-    else:
-        print(f"File {local_file} already exists.")
+    url = 'https://psl.noaa.gov/thredds/dodsC/Datasets/cru/hadcrut4/air.mon.anom.median.nc'
 
     # Now load the local file with xarray
     print("\nLoading the dataset with xarray...")
-    ds = xr.open_dataset(local_file)
+    ds = xr.open_dataset(url)
 
     # Display basic information about the dataset
     print("\nDataset Information:")

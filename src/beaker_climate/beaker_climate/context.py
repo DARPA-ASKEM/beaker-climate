@@ -27,7 +27,9 @@ class ClimateDataUtilityContext(BeakerContext):
 
     async def setup(self, context_info=None, parent_header=None):
         # Custom setup can be done here
-        catalog_url = pathlib.Path(__file__).parent / 'catalogs/master.yaml'
-        await self.evaluate(f'__catalog_url = "{catalog_url}"')
+        pangeo_url = pathlib.Path(__file__).parent / 'catalogs/master.yaml'
+        await self.evaluate(f'__pangeo_url = "{pangeo_url}"')
+        noaa_url = pathlib.Path(__file__).parent / 'api_documentation/noaa_catalog.yaml'
+        await self.evaluate(f'__noaa_url = "{noaa_url}"')
         code = self.get_code("setup")
         await self.evaluate(code)

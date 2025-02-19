@@ -1,5 +1,5 @@
 import intake
-pangeo_catalog = intake.open_catalog(__catalog_url)
+pangeo_catalog = intake.open_catalog(__pangeo_url)
 __pangeo_info = { 
     entry._name: {
         'description': entry._description,
@@ -9,4 +9,3 @@ __pangeo_info = {
     for category in pangeo_catalog.keys()
     for _, entry in getattr(pangeo_catalog, category).walk(depth=5).items()
 }
-

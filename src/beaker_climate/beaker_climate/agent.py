@@ -62,7 +62,7 @@ class ClimateDataUtilityAgent(BeakerAgent):
         self.api_list = [spec['name'] for spec in specs]
 
     @tool()
-    async def get_catalog_info(self, agent: AgentRef) -> str:
+    async def get_pangeo_catalog_info(self, agent: AgentRef) -> str:
         """
         Fetches names and descriptions of all relevant pangeo catalogs.
 
@@ -73,7 +73,7 @@ class ClimateDataUtilityAgent(BeakerAgent):
         return response
 
     @tool 
-    async def load_catalog(
+    async def load_pangeo_catalog(
         self, 
         category: str, 
         dataset: str, 
@@ -104,7 +104,7 @@ class ClimateDataUtilityAgent(BeakerAgent):
             return str(e)
 
     @tool()
-    async def inspect_catalog(self, catalog: str, agent: AgentRef,
+    async def inspect_pangeo_catalog(self, catalog: str, agent: AgentRef,
         loop: LoopControllerRef,
         react_context: ReactContextRef) -> str:
         """
@@ -126,11 +126,11 @@ class ClimateDataUtilityAgent(BeakerAgent):
 
 
     @tool()
-    async def search(self, catalog: str, keywords: dict, agent: AgentRef) -> list:
+    async def search_pangeo(self, catalog: str, keywords: dict, agent: AgentRef) -> list:
         """
         Search the catalog using keywords.
         This returns a list of datasets in the catalog that match.
-        You will use this before getting a dataset with get_dataset tool.
+        You will use this before getting a dataset with get_pangeo_dataset tool.
         
         Args:
             catalog (str): the catalog you've loaded with load_catalog
@@ -147,10 +147,10 @@ class ClimateDataUtilityAgent(BeakerAgent):
     
     
     @tool()
-    async def get_dataset(self, variable_name: str, name: str, agent: AgentRef) -> str:
+    async def get_pangeo_dataset(self, variable_name: str, name: str, agent: AgentRef) -> str:
         """
         Get a dataset from the prior search and loads it to a given variable.
-        This should be used after the search tool.
+        This should be used after the search_pangeo tool.
         
         Args:
             variable_name: the target variable name to save the dataset to
