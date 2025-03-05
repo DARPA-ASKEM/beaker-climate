@@ -1,0 +1,16 @@
+name: NOAA Physical Sciences Laboratory
+cache_key: api_assistant_noaa_json
+description: |
+    The NOAA Physical Sciences Laboratory (PSL) is a research center within the National Oceanic and Atmospheric Administration (NOAA) that focuses on the physical sciences of the atmosphere and ocean. PSL conducts research on topics such as climate change, weather forecasting, and oceanography.
+raw_documentation: !load noaa_catalog_full.yaml
+cache_body: 
+    default: true 
+documentation: |
+    NOAA PSL contains thousands of NetCDF files, from one of 48 gridded weather datasets. The following is a catalog of datasets that 
+    are available for download, including dataset descriptions and links to the actual data files.
+
+    You will want to give URLs to the requesting agent for what datasets might match what they're looking for.
+
+    Here is the catalog.
+
+    {raw_documentation}

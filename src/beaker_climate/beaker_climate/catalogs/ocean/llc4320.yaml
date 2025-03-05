@@ -1,0 +1,89 @@
+plugins:
+  source:
+    - module: intake_xarray
+
+sources:
+
+  LLC4320_grid:
+    description: MITgcm LLC4320 Ocean Simulation Grid
+    metadata:
+      url: 'http://online.kitp.ucsb.edu/online/blayers18/menemenlis/'
+      tags:
+        - ocean
+        - model
+    driver: zarr
+    args:
+      urlpath: gs://pangeo-ecco-llc4320/grid
+      consolidated: True
+      storage_options:
+        requester_pays: True
+
+  LLC4320_SST:
+    description: MITgcm LLC4320 Ocean Simulation Sea Surface Temperature
+    metadata:
+      url: 'http://online.kitp.ucsb.edu/online/blayers18/menemenlis/'
+      tags:
+        - ocean
+        - model
+    driver: zarr
+    args:
+      urlpath: gs://pangeo-ecco-llc4320/sst
+      consolidated: True
+      storage_options:
+        requester_pays: True
+
+  LLC4320_SSS:
+    description: MITgcm LLC4320 Ocean Simulation Sea Surface Salinity
+    metadata:
+      url: 'http://online.kitp.ucsb.edu/online/blayers18/menemenlis/'
+      tags:
+        - ocean
+        - model
+    driver: zarr
+    args:
+      urlpath: gs://pangeo-ecco-llc4320/sss
+      consolidated: True
+      storage_options:
+        requester_pays: True
+
+  LLC4320_SSH:
+    description: MITgcm LLC4320 Ocean Simulation Sea Surface Height
+    metadata:
+      url: 'http://online.kitp.ucsb.edu/online/blayers18/menemenlis/'
+      tags:
+        - ocean
+        - model
+    driver: zarr
+    args:
+      urlpath: gs://pangeo-ecco-llc4320/ssh
+      consolidated: True
+      storage_options:
+        requester_pays: True
+
+  LLC4320_SSU:
+    description: MITgcm LLC4320 Ocean Simulation Sea Surface Zonal Velocity
+    metadata:
+      url: 'http://online.kitp.ucsb.edu/online/blayers18/menemenlis/'
+      tags:
+        - ocean
+        - model
+    driver: zarr
+    args:
+      urlpath: gs://pangeo-ecco-llc4320/ssu
+      consolidated: True
+      storage_options:
+        requester_pays: True
+
+  LLC4320_SSV:
+    description: MITgcm LLC4320 Ocean Simulation Sea Surface Meridional Velocity
+    metadata:
+      url: 'http://online.kitp.ucsb.edu/online/blayers18/menemenlis/'
+      tags:
+        - ocean
+        - model
+    driver: zarr
+    args:
+      urlpath: gs://pangeo-ecco-llc4320/ssv
+      consolidated: True
+      storage_options:
+        requester_pays: True
